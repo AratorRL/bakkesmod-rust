@@ -4,7 +4,7 @@ use std::cell::RefCell;
 use std::sync::atomic::AtomicBool;
 use std::sync::Mutex;
 
-use std::ffi::CString;
+use std::ffi::{CString, CStr};
 use std::os::raw::c_char;
 
 use super::wrappers::CarWrapper;
@@ -24,11 +24,19 @@ pub fn bakkesmod() -> &'static dyn BakkesMod {
     unsafe { BAKKESMOD }
 }
 
-// type NotifierCallback = Box<dyn FnMut(usize, u32)>;
-type NotifierCallback = dyn FnMut(usize, u32);
+// type NotifierCallback = dyn FnMut(usize, u32);
+type NotifierCallback = dyn FnMut(Vec<String>);
 
 pub fn log(text: &str) {
     bakkesmod().log(text);
+}
+
+// #[macro_export]
+macro_rules! log_console {
+    ($fmt_string:expr, $($arg:tt)*) => {{
+        let res = format!($fmt_string, ($($arg)*));
+        crate::bakkesmod::log(&res)
+    }}
 }
 
 pub fn register_notifier(name: &str, callback: Box<NotifierCallback>) {
@@ -99,31 +107,35 @@ impl BakkesMod for BakkesModWrapper {
     }
 
     fn call_callback(&self, addr: usize, params: *const *const c_char, len: u32) {
+        info!("callback called!");
+        info!("user data: {:x?}", addr);
+
+        if len <= 0 { info!("callback called but len is <= 0 !"); return; }
+
+        let params_ptr_ptr = params as *const *const c_char;
+        if params_ptr_ptr.is_null() { info!("ptr to params ptr is null!"); return; }
+
+        let mut rust_params: Vec<String> = Vec::new();
+
+        for i in 0..len {
+            let params_ptr = unsafe { *(params_ptr_ptr.offset(i as isize)) as *const c_char };
+            if params_ptr.is_null() { info!("params ptr is null!"); return; }
+
+            let params_c_str = unsafe { CStr::from_ptr(params_ptr) };
+            match params_c_str.to_str() {
+                Ok(s) => rust_params.push(String::from(s)),
+                Err(_) => { info!("params null"); return; }
+            };
+        }
+
         let mut closure = unsafe { Box::from_raw(addr as *mut Box<NotifierCallback>) };
-        closure(params as usize, len);
+        closure(rust_params);
         let _ = Box::into_raw(closure);
     }
 }
 
 extern "C" fn notifier_callback(user_data: usize, params: *const *const c_char, len: u32) {
-    info!("callback called!");
-    info!("trying to find rust callback...");
-    info!("user data: {:x?}", user_data);
-    
     bakkesmod().call_callback(user_data, params, len);
-
-    // let callback: fn(usize, u32) = unsafe { std::mem::transmute::<usize, fn(usize, u32)>(user_data) };
-    // unsafe {
-    //     let c_buf: *mut c_char = *params as *mut c_char;
-    //     let c_str: CString = CString::from_raw(c_buf);
-    //     let name = c_str.to_str().unwrap();
-    //     info!("name = {}", name);
-    // };
-    // match get_global_struct().find_callback(name)
-    // register_notifier("hello", { 
-    //     fn inner_func(_: usize, _: u32) {}
-    //     inner_func
-    // });
 }
     
 extern "C" {

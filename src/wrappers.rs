@@ -1,4 +1,3 @@
-
 pub struct CarWrapper(pub usize);
 
 pub trait Car {
