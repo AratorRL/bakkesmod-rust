@@ -1,22 +1,67 @@
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::cell::RefCell;
+use std::sync::atomic::AtomicBool;
+use std::sync::Mutex;
 
 use std::ffi::CString;
 use std::os::raw::c_char;
 
-// type NotifierCallback = fn(params: usize, len: u32);
-type NotifierCallback = dyn Fn(Plugin, usize, u32) -> ();
-
-pub struct Plugin {
-    pub id: u64,
-    pub callbacks: HashMap<String, Box<NotifierCallback>>
-}
-
 use super::wrappers::CarWrapper;
 
-impl Plugin {
-    pub fn log(&self, text: &str) {
+static mut BAKKESMOD: &dyn BakkesMod = &Dummy;
+// static INITIALIZED: AtomicBool = AtomicBool::new(false);
+
+pub fn bakkesmod_init(id: u64) {
+    let bm_wrapper = Box::new(BakkesModWrapper {
+        id,
+        callbacks: Mutex::new(Vec::new())
+    });
+    unsafe { BAKKESMOD = Box::leak(bm_wrapper); }
+}
+
+pub fn bakkesmod() -> &'static dyn BakkesMod {
+    unsafe { BAKKESMOD }
+}
+
+// type NotifierCallback = Box<dyn FnMut(usize, u32)>;
+type NotifierCallback = dyn FnMut(usize, u32);
+
+pub fn log(text: &str) {
+    bakkesmod().log(text);
+}
+
+pub fn register_notifier(name: &str, callback: Box<NotifierCallback>) {
+    bakkesmod().register_notifier(name, callback);
+}
+
+pub fn get_local_car() -> Option<CarWrapper> {
+    bakkesmod().get_local_car()
+}
+
+pub trait BakkesMod {
+    fn log(&self, text: &str);
+    fn get_local_car(&self) -> Option<CarWrapper>;
+    fn register_notifier(&self, name: &str, callback: Box<NotifierCallback>);
+    fn call_callback(&self, addr: usize, params: *const *const c_char, len: u32);
+}
+
+struct Dummy;
+
+impl BakkesMod for Dummy {
+    fn log(&self, text: &str) {}
+    fn get_local_car(&self) -> Option<CarWrapper> { None }
+    fn register_notifier(&self, name: &str, callback: Box<NotifierCallback>) {}
+    fn call_callback(&self, addr: usize, params: *const *const c_char, len: u32) {}
+}
+
+struct BakkesModWrapper {
+    pub id: u64,
+    pub callbacks: Mutex<Vec<usize>>
+}
+
+impl BakkesMod for BakkesModWrapper {
+    fn log(&self, text: &str) {
         info!("trying to log \"{}\"", text);
         let id = self.id;
         let c_text = CString::new(text).unwrap();
@@ -24,14 +69,7 @@ impl Plugin {
         unsafe { LogConsole(id, c_text); }
     }
 
-    fn call_callback(&self, name: &str) {
-        match self.callbacks.get(name) {
-            Some(callback) => callback(Plugin { id: 0, callbacks: HashMap::new() }, 0, 0),
-            None => warn!("trying to call callback {}, but not found in map!", name)
-        };
-    }
-
-    pub fn get_local_car(&self) -> Option<CarWrapper> {
+    fn get_local_car(&self) -> Option<CarWrapper> {
         info!("calling get_local_car()");
         let p_car = unsafe { GetLocalCar() };
         match p_car {
@@ -39,33 +77,40 @@ impl Plugin {
             _ => Some(CarWrapper(p_car))
         }
     }
+
+    fn register_notifier(&self, name: &str, callback: Box<NotifierCallback>) {
+        let callback = Box::new(callback);
+        let addr = Box::into_raw(callback) as usize;
+
+        {
+            let mut callbacks = self.callbacks.lock().unwrap();
+            callbacks.push(addr);
+        }
+
+        let id = self.id;
+        let c_name = CString::new(name).unwrap();
+        let c_name: *const c_char = c_name.as_ptr();
+
+        let c_callback = notifier_callback as usize;
+        let user_data = addr;
+
+        let c_description: *const c_char = CString::new("").unwrap().as_ptr();
+        unsafe { RegisterNotifier(id, user_data, c_name, c_callback, c_description, 0) }
+    }
+
+    fn call_callback(&self, addr: usize, params: *const *const c_char, len: u32) {
+        let mut closure = unsafe { Box::from_raw(addr as *mut Box<NotifierCallback>) };
+        closure(params as usize, len);
+        let _ = Box::into_raw(closure);
+    }
 }
-
-pub fn register_notifier<F>(plugin: Rc<RefCell<Plugin>>, name: &str, callback: F)
-where F: Fn(Rc<RefCell<Plugin>>, usize, u32) + 'static {
-    info!("registering name {}", name);
-    let plugin_brw = plugin.borrow_mut();
-    let id = plugin_brw.id;
-    let c_name = CString::new(name).unwrap();
-    let c_name: *const c_char = c_name.as_ptr();
-
-    // get_global_struct().add_callback(name, callback);
-
-    let c_callback = notifier_callback as usize;
-    // self.callbacks.insert(String::from(name), Box::new(callback));
-    // let user_data = 1337 as usize;
-    // let user_data = Box::into_raw(self) as usize;
-    let user_data = Rc::into_raw(plugin) as usize;
-    let c_description: *const c_char = CString::new("").unwrap().as_ptr();
-    unsafe { RegisterNotifier(id, user_data, c_name, c_callback, c_description, 0) }
-}
-
 
 extern "C" fn notifier_callback(user_data: usize, params: *const *const c_char, len: u32) {
     info!("callback called!");
     info!("trying to find rust callback...");
     info!("user data: {:x?}", user_data);
     
+    bakkesmod().call_callback(user_data, params, len);
 
     // let callback: fn(usize, u32) = unsafe { std::mem::transmute::<usize, fn(usize, u32)>(user_data) };
     // unsafe {
