@@ -7,6 +7,8 @@ use std::cell::RefCell;
 use simplelog::{WriteLogger, LevelFilter, Config};
 use std::fs::File;
 
+use bakkesmod_macros::plugin_init;
+
 #[macro_use]
 mod bakkesmod;
 
@@ -24,17 +26,14 @@ struct Plugin {
     my_data: u32
 }
 
-#[no_mangle]
-pub extern "C" fn InitPlugin(id: u64) {
-    let _ = WriteLogger::init(LevelFilter::Info, Config::default(), File::create("rustplugin.log").unwrap());
-    info!("Hello from a Rust plugin!");
+#[plugin_init]
+pub fn on_load() {
 
     let plugin = Rc::new(RefCell::new(Plugin {
         my_data: 1337
     }));
 
-    bakkesmod::bakkesmod_init(id);
-    bakkesmod::log("henlo from rust");
+    log_console!("henlo from rust");
 
     let plugin_ref = Rc::clone(&plugin);
 
@@ -56,7 +55,10 @@ pub extern "C" fn InitPlugin(id: u64) {
         }
     }));
 
-    bakkesmod::register_notifier("rust_demolish", Box::new(rust_demolish));
-
-    info!("finished initialization");
+    bakkesmod::register_notifier("rust_demolish", Box::new(move |params: Vec<String>| {
+        match bakkesmod::get_local_car() {
+            Some(car) => car.demolish(),
+            None => log_console!("Car is NULL")
+        };
+    }));
 }

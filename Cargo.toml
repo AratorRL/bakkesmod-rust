@@ -9,7 +9,13 @@ edition = "2018"
 [dependencies]
 log = "0.4"
 simplelog = "^0.7.4"
+bakkesmod-macros = { path = "bakkesmod-macros"}
 
 [lib]
 name = "rustplugin"
 crate_type = ["cdylib"]
+
+[workspace]
+members = [
+    "bakkesmod-macros"
+]

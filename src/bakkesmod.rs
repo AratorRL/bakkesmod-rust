@@ -32,11 +32,17 @@ pub fn log(text: &str) {
 }
 
 // #[macro_export]
+// macro_rules! log_console {
+//     ($fmt_string:expr, $($arg:tt)*) => {{
+//         let res = format!($fmt_string, ($($arg)*));
+//         crate::bakkesmod::log(&res)
+//     }}
+// }
+
 macro_rules! log_console {
-    ($fmt_string:expr, $($arg:tt)*) => {{
-        let res = format!($fmt_string, ($($arg)*));
-        crate::bakkesmod::log(&res)
-    }}
+    ($($arg:tt)*) => ({
+        crate::bakkesmod::log(&format!($($arg)*));
+    })
 }
 
 pub fn register_notifier(name: &str, callback: Box<NotifierCallback>) {
