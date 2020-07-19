@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -39,6 +41,7 @@ pub fn log(text: &str) {
 //     }}
 // }
 
+#[macro_export]
 macro_rules! log_console {
     ($($arg:tt)*) => ({
         crate::bakkesmod::log(&format!($($arg)*));
