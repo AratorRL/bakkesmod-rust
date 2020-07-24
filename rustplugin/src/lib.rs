@@ -7,8 +7,10 @@ use std::fs::File;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-use bakkesmod::{self, log_console, plugin_init};
+#[macro_use]
 use bakkesmod::wrappers::*;
+use bakkesmod::{vec2, vec3};
+use bakkesmod::{self, log_console, plugin_init};
 
 #[plugin_init]
 pub fn on_load() {
@@ -27,7 +29,9 @@ pub fn on_load() {
     bakkesmod::register_notifier("rust_set_loc", Box::new(move |_: Vec<String>| {
         match bakkesmod::get_local_car() {
             Some(car) => {
-                car.set_location(Vector::new(0.0, 0.0, 0.0));
+                let origin = Vector3::new(0.0, 0.0, 0.0);
+                let new_loc = origin + Vector3::new(200.0, 1000.0, 50.0);
+                car.set_location(new_loc);
             }
             None => log_console!("Car is NULL")
         };
@@ -55,9 +59,13 @@ pub fn on_load() {
     }));
 
     bakkesmod::register_drawable(Box::new(move |canvas: Canvas| {
-        let start = Vector2::new(100, 100);
-        let end = Vector2::new(300, 300);
-        canvas.draw_line(start, end);
+        let top_left = vec2!(100, 100);
+        let width = vec2!(250, 0);
+        let height = vec2!(0, 150);
+        canvas.draw_line(top_left, top_left + width);
+        canvas.draw_line(top_left + width, top_left + width + height);
+        canvas.draw_line(top_left, top_left + height);
+        canvas.draw_line(top_left + height, top_left + width + height);
     }));
 
     // bakkesmod::hook_event_with_caller(
