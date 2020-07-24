@@ -23,6 +23,7 @@ name = "bakkesmod"
 version = "0.1.0"
 dependencies = [
  "bakkesmod-macros",
+ "lazy_static",
  "log",
  "simplelog",
 ]
