@@ -12,6 +12,7 @@ use std::os::raw::c_char;
 use super::wrappers::CarWrapper;
 use super::wrappers::Car;
 use super::wrappers::Object;
+use super::wrappers::Canvas;
 
 static mut BAKKESMOD: &dyn BakkesMod = &Dummy;
 // static INITIALIZED: AtomicBool = AtomicBool::new(false);
@@ -21,6 +22,7 @@ pub fn bakkesmod_init(id: u64) {
         id,
         notifier_callbacks: Mutex::new(Vec::new()),
         hook_callbacks: Mutex::new(Vec::new()),
+        drawable_callbacks: Mutex::new(Vec::new()),
     });
     unsafe { BAKKESMOD = Box::leak(bm_wrapper); }
 }
@@ -34,6 +36,7 @@ type NotifierCallback = dyn FnMut(Vec<String>);
 type HookCallback = dyn FnMut();
 type HookWithCallerCallback<T> = dyn FnMut(Box<T>);
 type HookWithCallerCallbackInternal = dyn FnMut(usize, usize);
+type DrawableCallback = dyn FnMut(Canvas);
 
 pub fn log(text: &str) {
     bakkesmod().log(text);
@@ -68,6 +71,10 @@ pub fn hook_event_with_caller<T: Object + 'static>(name: &str, mut callback: Box
     bakkesmod().register_hook_with_caller(name, wrapper_callback);
 }
 
+pub fn register_drawable(callback: Box<DrawableCallback>) {
+    bakkesmod().register_drawable(callback);
+}
+
 pub fn get_local_car() -> Option<CarWrapper> {
     bakkesmod().get_local_car()
 }
@@ -85,6 +92,9 @@ pub trait BakkesMod {
 
     fn register_hook_with_caller(&self, name: &str, callback: Box<HookWithCallerCallbackInternal>);
     fn call_hook_with_caller_callback(&self, addr: usize, caller: usize, params: usize);
+
+    fn register_drawable(&self, callback: Box<DrawableCallback>);
+    fn call_drawable_callback(&self, addr: usize, canvas: usize);
 }
 
 struct Dummy;
@@ -102,12 +112,16 @@ impl BakkesMod for Dummy {
 
     fn register_hook_with_caller(&self, name: &str, callback: Box<HookWithCallerCallbackInternal>) {}
     fn call_hook_with_caller_callback(&self, addr: usize, caller: usize, params: usize) {}
+
+    fn register_drawable(&self, callback: Box<DrawableCallback>) {}
+    fn call_drawable_callback(&self, addr: usize, canvas: usize) {}
 }
 
 struct BakkesModWrapper {
     pub id: u64,
     pub notifier_callbacks: Mutex<Vec<usize>>,
     pub hook_callbacks: Mutex<Vec<usize>>,
+    pub drawable_callbacks: Mutex<Vec<usize>>,
 }
 
 impl BakkesMod for BakkesModWrapper {
@@ -198,6 +212,29 @@ impl BakkesMod for BakkesModWrapper {
         let _ = Box::into_raw(closure);
     }
 
+    fn register_drawable(&self, callback: Box<DrawableCallback>) {
+        let callback = Box::new(callback);
+        let addr = Box::into_raw(callback) as usize;
+        
+        {
+            let mut drawable_callbacks = self.drawable_callbacks.lock().unwrap();
+            drawable_callbacks.push(addr);
+        }
+
+        let id = self.id;
+
+        let c_callback = drawable_callback as usize;
+        let user_data = addr;
+        unsafe { RegisterDrawable(id, user_data, c_callback); }
+    }
+
+    fn call_drawable_callback(&self, addr: usize, canvas: usize) {
+        let mut closure = unsafe { Box::from_raw(addr as *mut Box<DrawableCallback>) };
+        let canvas = Canvas::new(canvas);
+        closure(canvas);
+        let _ = Box::into_raw(closure);
+    }
+
     fn register_cvar(&self, name: &str) {
         let id = self.id;
         let c_name = CString::new(name).unwrap();
@@ -250,6 +287,10 @@ extern "C" fn hook_callback(user_data: usize) {
 extern "C" fn hook_with_caller_callback(user_data: usize, caller: usize, params: usize) {
     bakkesmod().call_hook_with_caller_callback(user_data, caller, params);
 }
+
+extern "C" fn drawable_callback(user_data: usize, canvas: usize) {
+    bakkesmod().call_drawable_callback(user_data, canvas);
+}
     
 extern "C" {
     fn LogConsole(id: u64, text: *const c_char);
@@ -257,6 +298,7 @@ extern "C" {
     fn RegisterCvar(id: u64, cvar: *const c_char, default_value: *const c_char, desc: *const c_char, searchable: bool, has_min: bool, min: f32, has_max: bool, max: f32, save_to_cfg: bool);
     fn HookEvent(id: u64, user_data: usize, event_name: *const c_char, callback: usize);
     fn HookEventWithCaller(id: u64, user_data: usize, event_name: *const c_char, callback: usize);
+    fn RegisterDrawable(id: u64, user_data: usize, callback: usize);
 
     fn GetLocalCar() -> usize;
 }

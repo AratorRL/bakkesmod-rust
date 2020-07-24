@@ -1,5 +1,7 @@
 #![allow(unused)]
 
+use std::fmt;
+
 macro_rules! impl_object {
     ($name: ident) => {
         impl Object for $name {
@@ -59,9 +61,39 @@ impl Vector {
     pub fn new(x: f32, y: f32, z: f32) -> Vector {
         Vector {x, y, z}
     }
+}
 
-    // TODO: impl Debug trait instead
-    pub fn to_string(&self) -> String {
-        format!("{}, {}, {}", self.x, self.y, self.z)
+impl fmt::Display for Vector {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}, {}, {})", self.x, self.y, self.z)
     }
+}
+
+
+#[repr(C)]
+pub struct Vector2 {
+    x: u32,
+    y: u32
+}
+
+impl Vector2 {
+    pub fn new(x: u32, y: u32) -> Vector2 {
+        Vector2 { x, y }
+    }
+}
+
+pub struct Canvas(usize);
+
+impl Canvas {
+    pub fn new(addr: usize) -> Canvas {
+        Canvas(addr)
+    }
+
+    pub fn draw_line(&self, start: Vector2, end: Vector2) {
+        unsafe { Canvas_DrawLine(self.0, start, end); }
+    }
+}
+
+extern "C" {
+    fn Canvas_DrawLine(p_canvas: usize, start: Vector2, end: Vector2);
 }
