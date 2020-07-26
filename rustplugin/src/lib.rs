@@ -46,12 +46,23 @@ pub fn on_load() {
         let mut counter = counter_ref.borrow_mut();
         *counter += 1;
         if (*counter % 120) == 0 {
-            log_console!("viewport client tick");
+            // log_console!("viewport client tick");
 
             match bakkesmod::get_local_car() {
                 Some(car) => {
                     let location = car.get_location();
                     log_console!("{}", location);
+
+                    let vehicle_sim = car.get_vehicle_sim();
+                    info!("got vehicle sim: {:x?}", vehicle_sim.addr());
+                    let wheels = vehicle_sim.get_wheels();
+                    info!("got wheels: {:x?}", wheels.data);
+                    let wheel0 = wheels.get(0);
+                    info!("got wheel 0: {:x?}", wheel0.addr());
+                    log_console!("wheel 0 spin speed: {}", wheel0.get_spin_speed());
+                    let wheel3 = wheels.get(3);
+                    info!("got wheel 3: {:x?}", wheel3.addr());
+                    log_console!("wheel 3 spin speed: {}", wheel3.get_spin_speed());
                 }
                 None => log_console!("Car is NULL")
             };

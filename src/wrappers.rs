@@ -3,6 +3,7 @@
 use std::fmt;
 use std::ops;
 use std::convert::From;
+use std::marker::PhantomData;
 
 macro_rules! impl_object {
     ($name: ident) => {
@@ -30,7 +31,41 @@ pub trait Actor: Object {
 
 pub trait Car: Actor {
     fn demolish(&self);
+    fn get_last_wheels_hit_ball_time(&self) -> f32;
+    fn get_vehicle_sim(&self) -> VehicleSimWrapper;
 }
+
+pub trait Wheel: Object {
+    fn get_spin_speed(&self) -> f32;
+}
+
+pub struct WheelWrapper(pub usize);
+impl_object!(WheelWrapper);
+
+impl Wheel for WheelWrapper {
+    fn get_spin_speed(&self) -> f32 {
+        unsafe { Wheel_Get_SpinSpeed(self.addr()) }
+    }
+}
+
+pub trait VehicleSim: Object {
+    fn get_wheels(&self) -> RLArray<WheelWrapper>;
+}
+
+pub struct VehicleSimWrapper(pub usize);
+impl_object!(VehicleSimWrapper);
+
+impl VehicleSim for VehicleSimWrapper {
+    fn get_wheels(&self) -> RLArray<WheelWrapper> {
+        unsafe {
+            let mut array = RLArrayRaw::new();
+            let ptr: *mut RLArrayRaw = &mut array as *mut RLArrayRaw;
+            VehicleSim_Get_Wheels(self.addr(), ptr);
+            RLArray::from_raw(array)
+        }
+    }
+}
+
 
 impl_object!(CarWrapper);
 impl Actor for CarWrapper {}
@@ -41,14 +76,62 @@ impl Car for CarWrapper {
     fn demolish(&self) {
         unsafe { Car_Demolish(self.addr()); }
     }
+
+    fn get_last_wheels_hit_ball_time(&self) -> f32 {
+        unsafe { Car_Get_LastWheelsHitBallTime(self.addr()) }
+    }
+
+    fn get_vehicle_sim(&self) -> VehicleSimWrapper {
+        unsafe { VehicleSimWrapper(Car_Get_VehicleSim(self.addr())) }
+    }
 }
 
+#[repr(C)]
+struct RLArrayRaw {
+    data: usize,
+    count: u32,
+    max: u32
+}
+
+impl RLArrayRaw {
+    fn new() -> RLArrayRaw {
+        RLArrayRaw { data: 0, count: 0, max: 0 }
+    }
+}
+
+#[repr(C)]
+pub struct RLArray<T: Object> {
+    pub data: *mut usize,
+    count: u32,
+    max: u32,
+    phantom: PhantomData<T>
+}
+
+impl<T: Object> RLArray<T> {
+    fn from_raw(raw: RLArrayRaw) -> RLArray<T> {
+        RLArray { data: raw.data as *mut usize, count: 0, max: 0, phantom: PhantomData }
+    }
+
+    pub fn get(&self, index: isize) -> T {
+        unsafe { 
+            let ptr = self.data.offset(index);
+            T::new(*ptr)
+        }
+    }
+}
 
 extern "C" {
     fn Car_Demolish(p_car: usize);
 
     fn Actor_GetLocation(p_actor: usize) -> Vector3;
     fn Actor_SetLocation(p_actor: usize, new_loc: Vector3);
+    
+    fn Car_Get_LastWheelsHitBallTime(p_car: usize) -> f32;
+    fn Car_Get_VehicleSim(p_car: usize) -> usize;
+
+    fn VehicleSim_Get_Wheels(p_vehicle_sim: usize, result: *mut RLArrayRaw);
+
+    fn Wheel_Get_SpinSpeed(p_wheel: usize) -> f32;
 }
 
 
