@@ -39,6 +39,11 @@ pub fn plugin_init(attr: TokenStream, input: TokenStream) -> TokenStream {
 
             info!("finished initialization");
         }
+
+        #[no_mangle]
+        pub extern "C" fn ExitPlugin() {
+            bakkesmod::bakkesmod_exit();
+        }
     };
 
     tokens.into()

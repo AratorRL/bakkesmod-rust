@@ -18,8 +18,10 @@ trait BakkesMod {
     fn id(&self) -> u64;
     fn add_notifier_callback(&self, addr: usize);
     fn add_hook_callback(&self, addr: usize);
+    fn add_hook_caller_callback(&self, addr: usize);
     fn add_drawable_callback(&self, addr: usize);
     fn add_timeout_callback(&self, addr: usize);
+    fn drop_callbacks(&self);
 }
 
 static mut BAKKESMOD: &dyn BakkesMod = &Dummy;
@@ -29,10 +31,16 @@ pub fn bakkesmod_init(id: u64) {
         id,
         notifier_callbacks: Mutex::new(Vec::new()),
         hook_callbacks: Mutex::new(Vec::new()),
+        hook_caller_callbacks: Mutex::new(Vec::new()),
         drawable_callbacks: Mutex::new(Vec::new()),
         timeout_callbacks: Mutex::new(Vec::new()),
     });
     unsafe { BAKKESMOD = Box::leak(bm_wrapper); }
+}
+
+pub fn bakkesmod_exit() {
+    info!("exiting plugin");
+    bakkesmod().drop_callbacks();
 }
 
 fn bakkesmod() -> &'static dyn BakkesMod {
@@ -183,7 +191,7 @@ fn hook_event_with_caller_internal(name: &str, callback: Box<HookWithCallerCallb
     let cb_addr = Box::into_raw(callback) as usize;
 
     let bm = bakkesmod();
-    bm.add_hook_callback(cb_addr);
+    bm.add_hook_caller_callback(cb_addr);
 
     let id = bm.id();
     let c_name = CString::new(name).unwrap();
@@ -265,14 +273,17 @@ impl BakkesMod for Dummy {
     fn id(&self) -> u64 { 0 }
     fn add_notifier_callback(&self, addr: usize) {}
     fn add_hook_callback(&self, addr: usize) {}
+    fn add_hook_caller_callback(&self, addr: usize) {}
     fn add_drawable_callback(&self, addr: usize) {}
     fn add_timeout_callback(&self, addr: usize) {}
+    fn drop_callbacks(&self) {}
 }
 
 struct BakkesModWrapper {
     pub id: u64,
     pub notifier_callbacks: Mutex<Vec<usize>>,
     pub hook_callbacks: Mutex<Vec<usize>>,
+    pub hook_caller_callbacks: Mutex<Vec<usize>>,
     pub drawable_callbacks: Mutex<Vec<usize>>,
     pub timeout_callbacks: Mutex<Vec<usize>>,
 }
@@ -292,6 +303,11 @@ impl BakkesMod for BakkesModWrapper {
         callbacks.push(addr);
     }
 
+    fn add_hook_caller_callback(&self, addr: usize) {
+        let mut callbacks = self.hook_caller_callbacks.lock().unwrap();
+        callbacks.push(addr);
+    }
+
     fn add_drawable_callback(&self, addr: usize) {
         let mut callbacks = self.drawable_callbacks.lock().unwrap();
         callbacks.push(addr);
@@ -300,6 +316,33 @@ impl BakkesMod for BakkesModWrapper {
     fn add_timeout_callback(&self, addr: usize) {
         let mut callbacks = self.timeout_callbacks.lock().unwrap();
         callbacks.push(addr);
+    }
+
+    fn drop_callbacks(&self) {
+        let mut notifiers = self.notifier_callbacks.lock().unwrap();
+        for addr in notifiers.iter() {
+            let _ = unsafe { Box::from_raw(*addr as *mut Box<NotifierCallback>) };
+        }
+
+        let mut hooks = self.hook_callbacks.lock().unwrap();
+        for addr in hooks.iter() {
+            let _ = unsafe { Box::from_raw(*addr as *mut Box<HookCallback>) };
+        }
+
+        let mut hooks_caller = self.hook_caller_callbacks.lock().unwrap();
+        for addr in hooks_caller.iter() {
+            let _ = unsafe { Box::from_raw(*addr as *mut Box<HookWithCallerCallbackInternal>) };
+        }
+
+        let mut drawables = self.drawable_callbacks.lock().unwrap();
+        for addr in drawables.iter() {
+            let _ = unsafe { Box::from_raw(*addr as *mut Box<DrawableCallback>) };
+        }
+
+        let mut timeouts = self.timeout_callbacks.lock().unwrap();
+        for addr in timeouts.iter() {
+            let _ = unsafe { Box::from_raw(*addr as *mut Box<TimeoutCallback>) };
+        }
     }
 }
 
