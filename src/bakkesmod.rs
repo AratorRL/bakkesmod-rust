@@ -13,10 +13,12 @@ use super::wrappers::CarWrapper;
 use super::wrappers::Car;
 use super::wrappers::Object;
 use super::wrappers::Canvas;
+use super::wrappers::CVar;
 
 trait BakkesMod {
     fn id(&self) -> u64;
     fn add_notifier_callback(&self, addr: usize);
+    fn add_on_value_changed_callback(&self, addr: usize);
     fn add_hook_callback(&self, addr: usize);
     fn add_hook_caller_callback(&self, addr: usize);
     fn add_drawable_callback(&self, addr: usize);
@@ -30,6 +32,7 @@ pub fn bakkesmod_init(id: u64) {
     let bm_wrapper = Box::new(BakkesModWrapper {
         id,
         notifier_callbacks: Mutex::new(Vec::new()),
+        on_value_changed_callbacks: Mutex::new(Vec::new()),
         hook_callbacks: Mutex::new(Vec::new()),
         hook_caller_callbacks: Mutex::new(Vec::new()),
         drawable_callbacks: Mutex::new(Vec::new()),
@@ -43,12 +46,16 @@ pub fn bakkesmod_exit() {
     bakkesmod().drop_callbacks();
 }
 
+pub fn get_id() -> u64 {
+    bakkesmod().id()
+}
+
 fn bakkesmod() -> &'static dyn BakkesMod {
     unsafe { BAKKESMOD }
 }
 
 type NotifierCallback = dyn FnMut(Vec<String>);
-
+type OnValueChangedCallback = dyn FnMut(String, CVar);
 type HookCallback = dyn FnMut();
 type HookWithCallerCallback<T> = dyn FnMut(Box<T>);
 type HookWithCallerCallbackInternal = dyn FnMut(usize, usize);
@@ -108,7 +115,7 @@ extern "C" fn notifier_callback(addr: usize, params: *const *const c_char, len: 
     let _ = Box::into_raw(closure);
 }
 
-pub fn register_cvar(name: &str) {
+pub fn register_cvar(name: &str) -> CVar {
     let id = bakkesmod().id();
     let c_name = CString::new(name).unwrap();
     let c_name: *const c_char = c_name.as_ptr();
@@ -116,9 +123,44 @@ pub fn register_cvar(name: &str) {
     let c_defval: *const c_char = c_defval.as_ptr();
     let c_desc= CString::new("").unwrap();
     let c_desc: *const c_char = c_desc.as_ptr();
-    unsafe {
-        RegisterCvar(id, c_name, c_defval, c_desc, true, false, 0.0, false, 0.0, false);
+    let cvar = unsafe {
+        RegisterCVar(id, c_name, c_defval, c_desc, true, false, 0.0, false, 0.0, false)
+    };
+    CVar::new(cvar)
+}
+
+pub fn get_cvar(name: &str) -> Option<CVar> {
+    let c_name = CString::new(name).unwrap();
+    let c_name: *const c_char = c_name.as_ptr();
+    let cvar = unsafe {
+        GetCVar(c_name)
+    };
+
+    match cvar {
+        0 => None,
+        addr => Some(CVar::new(addr))
     }
+}
+
+pub fn add_on_value_changed(cvar: &CVar, callback: Box<OnValueChangedCallback>) {
+    let callback = Box::new(callback);
+    let cb_addr = Box::into_raw(callback) as usize;
+
+    let bm = bakkesmod();
+    bm.add_on_value_changed_callback(cb_addr);
+    let id = bm.id();
+
+    let c_callback = on_value_changed_callback as usize;
+
+    unsafe { CVar_AddOnValueChanged(cvar.addr(), id, cb_addr, c_callback); }
+}
+
+extern "C" fn on_value_changed_callback(addr: usize, old: *const c_char, cvar: usize) {
+    let mut closure = unsafe { Box::from_raw(addr as *mut Box<OnValueChangedCallback>) };
+
+    // TODO: use old string value
+    closure(String::new(), CVar::new(cvar));
+    let _ = Box::into_raw(closure);
 }
 
 macro_rules! cstring {
@@ -272,6 +314,7 @@ struct Dummy;
 impl BakkesMod for Dummy {
     fn id(&self) -> u64 { 0 }
     fn add_notifier_callback(&self, addr: usize) {}
+    fn add_on_value_changed_callback(&self, addr: usize) {}
     fn add_hook_callback(&self, addr: usize) {}
     fn add_hook_caller_callback(&self, addr: usize) {}
     fn add_drawable_callback(&self, addr: usize) {}
@@ -282,6 +325,7 @@ impl BakkesMod for Dummy {
 struct BakkesModWrapper {
     pub id: u64,
     pub notifier_callbacks: Mutex<Vec<usize>>,
+    pub on_value_changed_callbacks: Mutex<Vec<usize>>,
     pub hook_callbacks: Mutex<Vec<usize>>,
     pub hook_caller_callbacks: Mutex<Vec<usize>>,
     pub drawable_callbacks: Mutex<Vec<usize>>,
@@ -295,6 +339,11 @@ impl BakkesMod for BakkesModWrapper {
 
     fn add_notifier_callback(&self, addr: usize) {
         let mut callbacks = self.notifier_callbacks.lock().unwrap();
+        callbacks.push(addr);
+    }
+
+    fn add_on_value_changed_callback(&self, addr: usize) {
+        let mut callbacks = self.on_value_changed_callbacks.lock().unwrap();
         callbacks.push(addr);
     }
 
@@ -324,6 +373,11 @@ impl BakkesMod for BakkesModWrapper {
             let _ = unsafe { Box::from_raw(*addr as *mut Box<NotifierCallback>) };
         }
 
+        let mut on_value_changed = self.on_value_changed_callbacks.lock().unwrap();
+        for addr in on_value_changed.iter() {
+            let _ = unsafe { Box::from_raw(*addr as *mut Box<OnValueChangedCallback>) };
+        }
+
         let mut hooks = self.hook_callbacks.lock().unwrap();
         for addr in hooks.iter() {
             let _ = unsafe { Box::from_raw(*addr as *mut Box<HookCallback>) };
@@ -349,7 +403,8 @@ impl BakkesMod for BakkesModWrapper {
 extern "C" {
     fn LogConsole(id: u64, text: *const c_char);
     fn RegisterNotifier(id: u64, user_data: usize, cvar: *const c_char, callback: usize, description: *const c_char, permissions: u8);
-    fn RegisterCvar(id: u64, cvar: *const c_char, default_value: *const c_char, desc: *const c_char, searchable: bool, has_min: bool, min: f32, has_max: bool, max: f32, save_to_cfg: bool);
+    fn RegisterCVar(id: u64, cvar: *const c_char, default_value: *const c_char, desc: *const c_char, searchable: bool, has_min: bool, min: f32, has_max: bool, max: f32, save_to_cfg: bool) -> usize;
+    fn GetCVar(name: *const c_char) -> usize;
 
     fn HookEvent(id: u64, user_data: usize, event_name: *const c_char, callback: usize);
     fn HookEventPost(id: u64, user_data: usize, event_name: *const c_char, callback: usize);
@@ -361,6 +416,9 @@ extern "C" {
     fn UnregisterDrawables(id: u64);
     fn SetTimeout(id: u64, user_data: usize, callback: usize, time: f32);
     fn Execute(id: u64, user_data: usize, callback: usize);
+
+    fn CVar_AddOnValueChanged(p_cvar: usize, id: u64, user_data: usize, callback: usize);
+    fn CVar_RemoveOnValueChanged(p_cvar: usize, id: u64);
 
     fn GetLocalCar() -> usize;
 }

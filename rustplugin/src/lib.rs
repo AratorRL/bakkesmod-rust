@@ -39,37 +39,49 @@ pub fn on_load() {
         };
     }));
 
-    bakkesmod::register_cvar("rust_cvar");
+    let cvar = bakkesmod::register_cvar("rust_cvar");
+    log_console!("cvar name = {}", cvar.get_name());
+
+    bakkesmod::register_notifier("rust_set_gravity", Box::new(move |_: Vec<String>| {
+        match bakkesmod::get_cvar("sv_soccar_gravity") {
+            Some(cvar) => (),
+            None => log_console!("cvar 'sv_soccar_gravity' not found")
+        };
+    }));
 
     let counter_base = Rc::new(RefCell::new(0));
     let counter_ref = Rc::clone(&counter_base);
 
-    bakkesmod::hook_event("Function Engine.GameViewportClient.Tick", Box::new(move || {
-        let mut counter = counter_ref.borrow_mut();
-        *counter += 1;
-        if (*counter % 240) == 0 {
-            // log_console!("viewport client tick");
+    let ticker = false;
 
-            match bakkesmod::get_local_car() {
-                Some(car) => {
-                    let location = car.get_location();
-                    log_console!("{}", location);
+    if ticker {
+        bakkesmod::hook_event("Function Engine.GameViewportClient.Tick", Box::new(move || {
+            let mut counter = counter_ref.borrow_mut();
+            *counter += 1;
+            if (*counter % 240) == 0 {
+                // log_console!("viewport client tick");
 
-                    let vehicle_sim = car.get_vehicle_sim();
-                    info!("got vehicle sim: {:x?}", vehicle_sim.addr());
-                    let wheels = vehicle_sim.get_wheels();
-                    info!("got wheels: {:x?}", wheels.data);
-                    let wheel0 = wheels.get(0);
-                    info!("got wheel 0: {:x?}", wheel0.addr());
-                    log_console!("wheel 0 spin speed: {}", wheel0.get_spin_speed());
-                    let wheel3 = wheels.get(3);
-                    info!("got wheel 3: {:x?}", wheel3.addr());
-                    log_console!("wheel 3 spin speed: {}", wheel3.get_spin_speed());
-                }
-                None => log_console!("Car is NULL")
-            };
-        }
-    }));
+                match bakkesmod::get_local_car() {
+                    Some(car) => {
+                        let location = car.get_location();
+                        log_console!("{}", location);
+
+                        let vehicle_sim = car.get_vehicle_sim();
+                        info!("got vehicle sim: {:x?}", vehicle_sim.addr());
+                        let wheels = vehicle_sim.get_wheels();
+                        info!("got wheels: {:x?}", wheels.data);
+                        let wheel0 = wheels.get(0);
+                        info!("got wheel 0: {:x?}", wheel0.addr());
+                        log_console!("wheel 0 spin speed: {}", wheel0.get_spin_speed());
+                        let wheel3 = wheels.get(3);
+                        info!("got wheel 3: {:x?}", wheel3.addr());
+                        log_console!("wheel 3 spin speed: {}", wheel3.get_spin_speed());
+                    }
+                    None => log_console!("Car is NULL")
+                };
+            }
+        }));
+    }
 
     bakkesmod::register_drawable(Box::new(move |canvas: Canvas| {
         let top_left = vec2!(100, 100);
