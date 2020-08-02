@@ -42,11 +42,30 @@ pub fn on_load() {
     let cvar = bakkesmod::register_cvar("rust_cvar");
     log_console!("cvar name = {}", cvar.get_name());
 
-    bakkesmod::register_notifier("rust_set_gravity", Box::new(move |_: Vec<String>| {
+    bakkesmod::register_notifier("rust_set_gravity", Box::new(move |params: Vec<String>| {
+        if params.len() < 2 {
+            log_console!("not enough parameters!");
+            return;
+        }
+
+        let new_value_str = &params[1];
+        let new_value: f32 = match new_value_str.parse::<f32>() {
+            Ok(val) => val,
+            Err(_) => { log_console!("invalid input!"); return; }
+        };
+
         match bakkesmod::get_cvar("sv_soccar_gravity") {
-            Some(cvar) => (),
+            Some(cvar) => {
+                log_console!("current value: {}", cvar.get_float_value());
+                log_console!("setting to {}", new_value);
+                cvar.set_float_value(new_value);
+            }
             None => log_console!("cvar 'sv_soccar_gravity' not found")
         };
+    }));
+
+    bakkesmod::add_on_value_changed(&cvar, Box::new(move |old_val: String, cvar: CVar| {
+        log_console!("cvar {} has a new value: {}", cvar.get_name(), cvar.get_string_value());
     }));
 
     let counter_base = Rc::new(RefCell::new(0));
