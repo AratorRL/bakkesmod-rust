@@ -14,166 +14,126 @@ macro_rules! impl_object {
             fn new(addr: usize) -> Self { Self(addr) }
             fn addr(&self) -> usize { self.0 }
         }
+
+        impl UnrealPointer for $name {
+            fn from(addr: usize) -> Self { Self(addr) }
+        }
     }
 }
 
-pub trait Object {
+pub trait Object: UnrealPointer {
     fn new(addr: usize) -> Self;
     fn addr(&self) -> usize;
 }
 
-pub trait Actor: Object {
-    fn get_location(&self) -> Vector3 {
-        unsafe { Actor_GetLocation(self.addr()) }
-    }
+pub struct ObjectWrapper(pub usize);
+impl_object!(ObjectWrapper);
 
-    fn set_location(&self, new_loc: Vector3) {
-        unsafe { Actor_SetLocation(self.addr(), new_loc); }
-    }
+pub trait UnrealPointer {
+    fn from(addr: usize) -> Self;
 }
 
-pub trait Car: Actor {
-    fn demolish(&self);
-    fn get_last_wheels_hit_ball_time(&self) -> f32;
-    fn get_vehicle_sim(&self) -> VehicleSimWrapper;
-}
+macro_rules! impl_struct {
+    ($name: ident) => {
+        impl UnrealPointer for $name {
+            fn from(addr: usize) -> Self {
+                unsafe { *(addr as *const Self) }
+            }
+        }
 
-pub trait Wheel: Object {
-    fn get_spin_speed(&self) -> f32;
-}
-
-pub struct WheelWrapper(pub usize);
-impl_object!(WheelWrapper);
-
-impl Wheel for WheelWrapper {
-    fn get_spin_speed(&self) -> f32 {
-        unsafe { Wheel_Get_SpinSpeed(self.addr()) }
-    }
-}
-
-pub trait VehicleSim: Object {
-    fn get_wheels(&self) -> RLArray<WheelWrapper>;
-}
-
-pub struct VehicleSimWrapper(pub usize);
-impl_object!(VehicleSimWrapper);
-
-impl VehicleSim for VehicleSimWrapper {
-    fn get_wheels(&self) -> RLArray<WheelWrapper> {
-        unsafe {
-            let mut array = RLArrayRaw::new();
-            let ptr: *mut RLArrayRaw = &mut array as *mut RLArrayRaw;
-            VehicleSim_Get_Wheels(self.addr(), ptr);
-            RLArray::from_raw(array)
+        impl $name {
+            pub fn new() -> Self { Self }
         }
     }
 }
 
+// pub trait Actor: Object {
+//     fn get_location(&self) -> Vector {
+//         unsafe { Actor_GetLocation(self.addr()) }
+//     }
 
-impl_object!(CarWrapper);
-impl Actor for CarWrapper {}
+//     fn set_location(&self, new_loc: Vector) {
+//         unsafe { Actor_SetLocation(self.addr(), new_loc); }
+//     }
+// }
 
-pub struct CarWrapper(pub usize);
+// pub trait Car: Actor {
+//     fn demolish(&self);
+//     fn get_last_wheels_hit_ball_time(&self) -> f32;
+//     fn get_vehicle_sim(&self) -> VehicleSimWrapper;
+// }
 
-impl Car for CarWrapper {
-    fn demolish(&self) {
-        unsafe { Car_Demolish(self.addr()); }
-    }
+// pub trait Wheel: Object {
+//     fn get_spin_speed(&self) -> f32;
+// }
 
-    fn get_last_wheels_hit_ball_time(&self) -> f32 {
-        unsafe { Car_Get_LastWheelsHitBallTime(self.addr()) }
-    }
+// pub struct WheelWrapper(pub usize);
+// impl_object!(WheelWrapper);
 
-    fn get_vehicle_sim(&self) -> VehicleSimWrapper {
-        unsafe { VehicleSimWrapper(Car_Get_VehicleSim(self.addr())) }
-    }
-}
+// impl Wheel for WheelWrapper {
+//     fn get_spin_speed(&self) -> f32 {
+//         unsafe { Wheel_Get_SpinSpeed(self.addr()) }
+//     }
+// }
 
-#[repr(C)]
-struct RLArrayRaw {
-    data: usize,
-    count: u32,
-    max: u32
-}
+// pub trait VehicleSim: Object {
+//     fn get_wheels(&self) -> RLArray<WheelWrapper>;
+// }
 
-impl RLArrayRaw {
-    fn new() -> RLArrayRaw {
-        RLArrayRaw { data: 0, count: 0, max: 0 }
-    }
-}
+// pub struct VehicleSimWrapper(pub usize);
+// impl_object!(VehicleSimWrapper);
 
-#[repr(C)]
-pub struct RLArray<T: Object> {
-    pub data: *mut usize,
-    count: u32,
-    max: u32,
-    phantom: PhantomData<T>
-}
+// impl VehicleSim for VehicleSimWrapper {
+//     fn get_wheels(&self) -> RLArray<WheelWrapper> {
+//         unsafe {
+//             let mut array = RLArrayRaw::new();
+//             let ptr: *mut RLArrayRaw = &mut array as *mut RLArrayRaw;
+//             VehicleSim_Get_Wheels(self.addr(), ptr);
+//             RLArray::from_raw(array)
+//         }
+//     }
+// }
 
-impl<T: Object> RLArray<T> {
-    fn from_raw(raw: RLArrayRaw) -> RLArray<T> {
-        RLArray { data: raw.data as *mut usize, count: 0, max: 0, phantom: PhantomData }
-    }
 
-    pub fn get(&self, index: isize) -> T {
-        unsafe { 
-            let ptr = self.data.offset(index);
-            T::new(*ptr)
-        }
-    }
-}
+// impl_object!(CarWrapper);
+// impl Actor for CarWrapper {}
 
-extern "C" {
-    fn Car_Demolish(p_car: usize);
+// pub struct CarWrapper(pub usize);
 
-    fn Actor_GetLocation(p_actor: usize) -> Vector3;
-    fn Actor_SetLocation(p_actor: usize, new_loc: Vector3);
+// impl Car for CarWrapper {
+//     fn demolish(&self) {
+//         unsafe { Car_Demolish(self.addr()); }
+//     }
+
+//     fn get_last_wheels_hit_ball_time(&self) -> f32 {
+//         unsafe { Car_Get_LastWheelsHitBallTime(self.addr()) }
+//     }
+
+//     fn get_vehicle_sim(&self) -> VehicleSimWrapper {
+//         unsafe { VehicleSimWrapper(Car_Get_VehicleSim(self.addr())) }
+//     }
+// }
+
+
+// extern "C" {
+//     fn Car_Demolish(p_car: usize);
+
+//     fn Actor_GetLocation(p_actor: usize) -> Vector;
+//     fn Actor_SetLocation(p_actor: usize, new_loc: Vector);
     
-    fn Car_Get_LastWheelsHitBallTime(p_car: usize) -> f32;
-    fn Car_Get_VehicleSim(p_car: usize) -> usize;
+//     fn Car_Get_LastWheelsHitBallTime(p_car: usize) -> f32;
+//     fn Car_Get_VehicleSim(p_car: usize) -> usize;
 
-    fn VehicleSim_Get_Wheels(p_vehicle_sim: usize, result: *mut RLArrayRaw);
+//     fn VehicleSim_Get_Wheels(p_vehicle_sim: usize, result: *mut RLArrayRaw);
 
-    fn Wheel_Get_SpinSpeed(p_wheel: usize) -> f32;
-}
+//     fn Wheel_Get_SpinSpeed(p_wheel: usize) -> f32;
+// }
 
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct Vector3 {
-    x: f32,
-    y: f32,
-    z: f32
-}
-
-impl Vector3 {
-    pub fn new(x: f32, y: f32, z: f32) -> Vector3 {
-        Vector3 {x, y, z}
-    }
-}
-
-impl fmt::Display for Vector3 {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "({}, {}, {})", self.x, self.y, self.z)
-    }
-}
-
-impl ops::Add for Vector3 {
-    type Output = Vector3;
-
-    fn add(self, rhs: Vector3) -> Self::Output {
-        Vector3 {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
-            z: self.z + rhs.z
-        }
-    }
-}
 
 #[macro_export]
 macro_rules! vec3 {
     ($x:expr, $y:expr, $z:expr) => (
-        $crate::wrappers::Vector3::new($x as f32, $y as f32, $z as f32)
+        $crate::wrappers::Vector::from($x as f32, $y as f32, $z as f32)
     );
 }
 
@@ -305,3 +265,189 @@ extern "C" {
     fn CVar_SetIntValue(p_cvar: usize, value: i32);
     fn CVar_SetFloatValue(p_cvar: usize, value: f32);
 }
+
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct Vector {
+    x: f32,
+    y: f32,
+    z: f32
+}
+
+impl Vector {
+    pub fn new() -> Vector {
+        Vector { x: 0.0, y: 0.0, z: 0.0 }
+    }
+
+    pub fn from(x: f32, y: f32, z: f32) -> Vector {
+        Vector {x, y, z}
+    }
+}
+
+impl fmt::Display for Vector {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}, {}, {})", self.x, self.y, self.z)
+    }
+}
+
+impl ops::Add for Vector {
+    type Output = Vector;
+
+    fn add(self, rhs: Vector) -> Self::Output {
+        Vector {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z
+        }
+    }
+}
+
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct Rotator {
+    pitch: i32,
+    yaw: i32,
+    roll: i32
+}
+
+impl Rotator {
+    pub fn new() -> Rotator {
+        Rotator { pitch: 0, yaw: 0, roll:0 }
+    }
+
+    pub fn from(pitch: i32, yaw: i32, roll:i32) -> Rotator {
+        Rotator { pitch, yaw, roll }
+    }
+}
+
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct Color {
+    r: u8,
+    g: u8,
+    b: u8,
+    a: u8
+}
+
+impl Color {
+    pub fn new() -> Color {
+        Color { r: 0, g: 0, b: 0, a:0 }
+    }
+
+    pub fn from(r: u8, g: u8, b: u8, a: u8) -> Color {
+        Color {r, g, b, a}
+    }
+}
+
+
+
+#[repr(C)]
+pub struct RLArrayRaw {
+    data: usize,
+    count: u32,
+    max: u32
+}
+
+impl RLArrayRaw {
+    pub fn new() -> RLArrayRaw {
+        RLArrayRaw { data: 0, count: 0, max: 0 }
+    }
+}
+
+#[repr(C)]
+pub struct RLArray<T: UnrealPointer> {
+    pub data: *mut usize,
+    count: u32,
+    max: u32,
+    phantom: PhantomData<T>
+}
+
+impl<T: UnrealPointer> RLArray<T> {
+    pub fn from_raw(raw: RLArrayRaw) -> RLArray<T> {
+        RLArray { data: raw.data as *mut usize, count: 0, max: 0, phantom: PhantomData }
+    }
+
+    pub fn to_raw(&self) -> RLArrayRaw {
+        RLArrayRaw { data: self.data as usize, count: 0, max: 0 }
+    }
+
+    pub fn get(&self, index: isize) -> T {
+        unsafe { 
+            let ptr = self.data.offset(index);
+            T::from(*ptr)
+        }
+    }
+}
+
+#[repr(C)]
+pub struct RLString {
+    data: usize,
+    count: u32,
+    max: u32
+}
+
+impl RLString {
+    pub fn new() -> RLString {
+        RLString { data: 0, count: 0, max: 0 }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct ReplicatedRBState;
+impl_struct!(ReplicatedRBState);
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct VehicleInputs;
+impl_struct!(VehicleInputs);
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct UniqueNetId;
+impl_struct!(UniqueNetId);
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct WheelContactData;
+impl_struct!(WheelContactData);
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct LinearColor;
+impl_struct!(LinearColor);
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct TViewTarget;
+impl_struct!(TViewTarget);
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct WorldContactData;
+impl WorldContactData{ pub fn new() -> Self { Self } }
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct Double;
+impl_struct!(Double);
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct Sample;
+impl_struct!(Sample);
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct StickyForceData;
+impl_struct!(StickyForceData);
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct ProfileCameraSettings;
+impl_struct!(ProfileCameraSettings);
+
+

@@ -9,8 +9,8 @@ use std::sync::Mutex;
 use std::ffi::{CString, CStr};
 use std::os::raw::c_char;
 
-use super::wrappers::CarWrapper;
-use super::wrappers::Car;
+use crate::CarWrapper;
+use crate::Car;
 use super::wrappers::Object;
 use super::wrappers::Canvas;
 use super::wrappers::CVar;

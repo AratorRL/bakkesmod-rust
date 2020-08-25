@@ -8,9 +8,10 @@ use std::rc::Rc;
 use std::cell::RefCell;
 
 #[macro_use]
-use bakkesmod::wrappers::*;
+use bakkesmod::*;
 use bakkesmod::{vec2, vec3};
 use bakkesmod::{self, log_console, plugin_init};
+use bakkesmod::{Canvas, CVar, Vector, CarWrapper};
 
 #[plugin_init]
 pub fn on_load() {
@@ -31,8 +32,8 @@ pub fn on_load() {
     bakkesmod::register_notifier("rust_set_loc", Box::new(move |_: Vec<String>| {
         match bakkesmod::get_local_car() {
             Some(car) => {
-                let origin = Vector3::new(0.0, 0.0, 0.0);
-                let new_loc = origin + Vector3::new(200.0, 1000.0, 50.0);
+                let origin = Vector::from(0.0, 0.0, 0.0);
+                let new_loc = origin + Vector::from(200.0, 1000.0, 50.0);
                 car.set_location(new_loc);
             }
             None => log_console!("Car is NULL")

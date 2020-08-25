@@ -1,4 +1,6 @@
 #![allow(unused)]
+#![allow(non_camel_case_types)]
+#![allow(improper_ctypes)]
 
 #[macro_use] extern crate log;
 use simplelog::{WriteLogger, LevelFilter, Config};
@@ -7,6 +9,10 @@ use std::fs::File;
 mod bakkesmod;
 pub use bakkesmod::*;
 
-pub mod wrappers;
+#[macro_use] pub mod wrappers;
+pub use wrappers::*;
 
 pub use bakkesmod_macros::plugin_init;
+
+mod generated;
+pub use generated::*;
