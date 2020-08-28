@@ -1,14 +1,6 @@
-#![allow(unused)]
-
-#[macro_use] extern crate log;
-use simplelog::{WriteLogger, LevelFilter, Config};
-use std::fs::File;
-
 use std::rc::Rc;
 use std::cell::RefCell;
 
-#[macro_use]
-use bakkesmod::*;
 use bakkesmod::{vec2, vec3};
 use bakkesmod::{self, log_console, plugin_init};
 use bakkesmod::wrappers::*;
@@ -32,8 +24,8 @@ pub fn on_load() {
     bakkesmod::register_notifier("rust_set_loc", Box::new(move |_: Vec<String>| {
         match bakkesmod::get_local_car() {
             Some(car) => {
-                let origin = Vector::from(0.0, 0.0, 0.0);
-                let new_loc = origin + Vector::from(200.0, 1000.0, 50.0);
+                let origin = vec3!(0.0, 0.0, 0.0);
+                let new_loc = origin + vec3!(200.0, 1000.0, 50.0);
                 car.set_location(new_loc);
             }
             None => log_console!("Car is NULL")
@@ -65,7 +57,7 @@ pub fn on_load() {
         };
     }));
 
-    bakkesmod::add_on_value_changed(&cvar, Box::new(move |old_val: String, cvar: CVar| {
+    bakkesmod::add_on_value_changed(&cvar, Box::new(move |_: String, cvar: CVar| {
         log_console!("cvar {} has a new value: {}", cvar.get_name(), cvar.get_string_value());
     }));
 
@@ -87,14 +79,10 @@ pub fn on_load() {
                         log_console!("{}", location);
 
                         let vehicle_sim = car.get_vehicle_sim().unwrap();
-                        info!("got vehicle sim: {:x?}", vehicle_sim.addr());
                         let wheels = vehicle_sim.get_wheels();
-                        info!("got wheels: {:x?}", wheels.data);
                         let wheel0 = wheels.get(0);
-                        info!("got wheel 0: {:x?}", wheel0.addr());
                         log_console!("wheel 0 spin speed: {}", wheel0.get_spin_speed());
                         let wheel3 = wheels.get(3);
-                        info!("got wheel 3: {:x?}", wheel3.addr());
                         log_console!("wheel 3 spin speed: {}", wheel3.get_spin_speed());
                     }
                     None => log_console!("Car is NULL")
@@ -164,10 +152,4 @@ pub fn on_load() {
         game.spawn_bot(22, "Bors");
 
     }));
-
-    // bakkesmod::hook_event_with_caller(
-    //     "Function TAGame.Car_TA.SetVehicleInput",
-    //     Box::new(move |car: Box<CarWrapper>| {
-    //         car.demolish();
-    //     }));
 }
