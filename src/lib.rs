@@ -12,6 +12,9 @@ pub use bakkesmod::*;
 #[macro_use] pub mod wrappers;
 pub use wrappers::*;
 
+mod custom;
+pub use custom::*;
+
 pub use bakkesmod_macros::plugin_init;
 
 mod generated;

@@ -11,6 +11,7 @@ use std::os::raw::c_char;
 
 use crate::CarWrapper;
 use crate::Car;
+use crate::*;
 use super::wrappers::Object;
 use super::wrappers::Canvas;
 use super::wrappers::CVar;
@@ -300,6 +301,39 @@ pub fn log(text: &str) {
     unsafe { LogConsole(id, c_text); }
 }
 
+
+pub fn is_in_game() -> bool {
+    unsafe { IsInGame() }
+}
+
+pub fn is_in_online_game() -> bool {
+    unsafe { IsInOnlineGame() }
+}
+
+pub fn is_in_freeplay() -> bool {
+    unsafe { IsInFreeplay() }
+}
+
+pub fn is_in_custom_training() -> bool {
+    unsafe { IsInCustomTraining() }
+}
+
+pub fn is_spectating_in_online_game() -> bool {
+    unsafe { IsSpectatingInOnlineGame() }
+}
+
+pub fn is_paused() -> bool {
+    unsafe { IsPaused() }
+}
+    
+pub fn get_online_game() -> ServerWrapper {
+    unsafe { ServerWrapper::new(GetOnlineGame()) }
+}
+
+pub fn get_game_event_as_server() -> ServerWrapper {
+    unsafe { ServerWrapper::new(GetGameEventAsServer()) }
+}
+
 pub fn get_local_car() -> Option<CarWrapper> {
     info!("calling get_local_car()");
     let p_car = unsafe { GetLocalCar() };
@@ -308,6 +342,19 @@ pub fn get_local_car() -> Option<CarWrapper> {
         _ => Some(CarWrapper(p_car))
     }
 }
+
+pub fn get_camera() -> CameraWrapper {
+    unsafe { CameraWrapper::new(GetCamera()) }
+}
+
+pub fn get_engine() -> EngineTAWrapper {
+    unsafe { EngineTAWrapper::new(GetEngine()) }
+}
+
+pub fn get_player_controller() -> PlayerControllerWrapper {
+    unsafe { PlayerControllerWrapper::new(GetPlayerController()) }
+}
+
 
 struct Dummy;
 
@@ -420,5 +467,18 @@ extern "C" {
     fn CVar_AddOnValueChanged(p_cvar: usize, id: u64, user_data: usize, callback: usize);
     fn CVar_RemoveOnValueChanged(p_cvar: usize, id: u64);
 
+    fn IsInGame() -> bool;
+    fn IsInOnlineGame() -> bool;
+    fn IsInFreeplay() -> bool;
+    fn IsInReplay() -> bool;
+    fn IsInCustomTraining() -> bool;
+    fn IsSpectatingInOnlineGame() -> bool;
+    fn IsPaused() -> bool;
+    
+    fn GetOnlineGame() -> usize;
+    fn GetGameEventAsServer() -> usize;
     fn GetLocalCar() -> usize;
+    fn GetCamera() -> usize;
+    fn GetEngine() -> usize;
+    fn GetPlayerController() -> usize;
 }

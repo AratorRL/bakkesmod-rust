@@ -3,7 +3,7 @@
 use std::fmt;
 use std::ops;
 use std::convert::From;
-use std::marker::PhantomData;
+use std::marker::{PhantomData, Sized};
 
 use std::ffi::{CString, CStr};
 use std::os::raw::c_char;
@@ -12,6 +12,12 @@ macro_rules! impl_object {
     ($name: ident) => {
         impl Object for $name {
             fn new(addr: usize) -> Self { Self(addr) }
+            fn try_new(addr: usize) -> Option<Self> { 
+                match addr {
+                    0 => None,
+                    _ => Some(Self(addr))
+                }
+            }
             fn addr(&self) -> usize { self.0 }
         }
 
@@ -23,6 +29,7 @@ macro_rules! impl_object {
 
 pub trait Object: UnrealPointer {
     fn new(addr: usize) -> Self;
+    fn try_new(addr: usize) -> Option<Self> where Self: Sized;
     fn addr(&self) -> usize;
 }
 

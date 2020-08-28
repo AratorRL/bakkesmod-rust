@@ -72,7 +72,7 @@ pub fn on_load() {
     let counter_base = Rc::new(RefCell::new(0));
     let counter_ref = Rc::clone(&counter_base);
 
-    let ticker = false;
+    let ticker = true;
 
     if ticker {
         bakkesmod::hook_event("Function Engine.GameViewportClient.Tick", Box::new(move || {
@@ -134,6 +134,10 @@ pub fn on_load() {
                 log_console!("{} secs have passed!", time);
             }), time);
         }
+    }));
+
+    bakkesmod::register_notifier("rust_get_ball_info", Box::new(move |_: Vec<String>| {
+        // bakkesmod::get_game_event_as_server()
     }));
 
     // bakkesmod::hook_event_with_caller(
