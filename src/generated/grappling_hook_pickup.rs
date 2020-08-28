@@ -129,9 +129,9 @@ pub trait GrapplingHookPickup : TargetedPickup {
 			result
 		}
 	}
-	fn get_ball(&self) -> BallWrapper {
+	fn get_ball(&self) -> Option<BallWrapper> {
 		unsafe {
-			BallWrapper::new(SpecialPickup_GrapplingHook_TA_Get_Ball(self.addr()))
+			BallWrapper::try_new(SpecialPickup_GrapplingHook_TA_Get_Ball(self.addr()))
 		}
 	}
 	fn get_rope_origin(&self) -> Vector {

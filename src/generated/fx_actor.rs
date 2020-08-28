@@ -38,14 +38,14 @@ pub trait FXActor : Actor {
 			FXActor_X_Get_bHadOwner(self.addr())
 		}
 	}
-	fn get_parent(&self) -> FXActorWrapper {
+	fn get_parent(&self) -> Option<FXActorWrapper> {
 		unsafe {
-			FXActorWrapper::new(FXActor_X_Get_Parent(self.addr()))
+			FXActorWrapper::try_new(FXActor_X_Get_Parent(self.addr()))
 		}
 	}
-	fn get_attachment_actor(&self) -> ActorWrapper {
+	fn get_attachment_actor(&self) -> Option<ActorWrapper> {
 		unsafe {
-			ActorWrapper::new(FXActor_X_Get_AttachmentActor(self.addr()))
+			ActorWrapper::try_new(FXActor_X_Get_AttachmentActor(self.addr()))
 		}
 	}
 	fn get_destroy_wait_time(&self) -> f32 {

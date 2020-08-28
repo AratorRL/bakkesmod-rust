@@ -8,9 +8,9 @@ impl CarComponent for CarComponentWrapper {}
 impl Actor for CarComponentWrapper {}
 
 pub trait CarComponent : Actor {
-	fn get_fx_actor_archetype(&self) -> FXActorWrapper {
+	fn get_fx_actor_archetype(&self) -> Option<FXActorWrapper> {
 		unsafe {
-			FXActorWrapper::new(CarComponent_TA_Get_FXActorArchetype(self.addr()))
+			FXActorWrapper::try_new(CarComponent_TA_Get_FXActorArchetype(self.addr()))
 		}
 	}
 	fn get_b_disabled(&self) -> bool {
@@ -53,19 +53,19 @@ pub trait CarComponent : Actor {
 			CarComponent_TA_Get_ReplicatedActive(self.addr())
 		}
 	}
-	fn get_activator(&self) -> PriWrapper {
+	fn get_activator(&self) -> Option<PriWrapper> {
 		unsafe {
-			PriWrapper::new(CarComponent_TA_Get_Activator(self.addr()))
+			PriWrapper::try_new(CarComponent_TA_Get_Activator(self.addr()))
 		}
 	}
-	fn get_vehicle(&self) -> VehicleWrapper {
+	fn get_vehicle(&self) -> Option<VehicleWrapper> {
 		unsafe {
-			VehicleWrapper::new(CarComponent_TA_Get_Vehicle(self.addr()))
+			VehicleWrapper::try_new(CarComponent_TA_Get_Vehicle(self.addr()))
 		}
 	}
-	fn get_car(&self) -> CarWrapper {
+	fn get_car(&self) -> Option<CarWrapper> {
 		unsafe {
-			CarWrapper::new(CarComponent_TA_Get_Car(self.addr()))
+			CarWrapper::try_new(CarComponent_TA_Get_Car(self.addr()))
 		}
 	}
 	fn get_activity_time(&self) -> f32 {
@@ -78,9 +78,9 @@ pub trait CarComponent : Actor {
 			CarComponent_TA_Get_ReplicatedActivityTime(self.addr())
 		}
 	}
-	fn get_fx_actor(&self) -> FXActorWrapper {
+	fn get_fx_actor(&self) -> Option<FXActorWrapper> {
 		unsafe {
-			FXActorWrapper::new(CarComponent_TA_Get_FXActor(self.addr()))
+			FXActorWrapper::try_new(CarComponent_TA_Get_FXActor(self.addr()))
 		}
 	}
 	fn get_inactive_time(&self) -> f32 {

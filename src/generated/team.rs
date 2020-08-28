@@ -65,9 +65,9 @@ pub trait Team : TeamInfo {
             RLArray::from_raw(result)
         }
     }
-    fn get_game_event(&self) -> TeamGameEventWrapper {
+    fn get_game_event(&self) -> Option<TeamGameEventWrapper> {
         unsafe {
-            TeamGameEventWrapper::new(Team_TA_Get_GameEvent(self.addr()))
+            TeamGameEventWrapper::try_new(Team_TA_Get_GameEvent(self.addr()))
         }
     }
     fn get_members(&self) -> RLArray<PriWrapper> {
@@ -170,11 +170,11 @@ pub trait Team : TeamInfo {
             Team_TA_IsSingleParty(self.addr())
         }
     }
-    fn get_team_member_named(&self, player_name: RLString) -> PriWrapper {
+    fn get_team_member_named(&self, player_name: RLString) -> Option<PriWrapper> {
         unsafe {
             let mut player_name = player_name;
             let player_name: *mut RLString = &mut player_name as *mut RLString;
-            PriWrapper::new(Team_TA_GetTeamMemberNamed(self.addr(), player_name))
+            PriWrapper::try_new(Team_TA_GetTeamMemberNamed(self.addr(), player_name))
         }
     }
     fn get_num_bots(&self) -> i32 {

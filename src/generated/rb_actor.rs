@@ -104,14 +104,14 @@ pub trait RBActor : Actor {
             result
         }
     }
-    fn get_fx_actor_archetype(&self) -> FXActorWrapper {
+    fn get_fx_actor_archetype(&self) -> Option<FXActorWrapper> {
         unsafe {
-            FXActorWrapper::new(RBActor_TA_Get_FXActorArchetype(self.addr()))
+            FXActorWrapper::try_new(RBActor_TA_Get_FXActorArchetype(self.addr()))
         }
     }
-    fn get_fx_actor(&self) -> FXActorWrapper {
+    fn get_fx_actor(&self) -> Option<FXActorWrapper> {
         unsafe {
-            FXActorWrapper::new(RBActor_TA_Get_FXActor(self.addr()))
+            FXActorWrapper::try_new(RBActor_TA_Get_FXActor(self.addr()))
         }
     }
     fn get_last_rb_collisions_frame(&self) -> i32 {
@@ -119,14 +119,14 @@ pub trait RBActor : Actor {
             RBActor_TA_Get_LastRBCollisionsFrame(self.addr())
         }
     }
-    fn get_welded_actor(&self) -> RBActorWrapper {
+    fn get_welded_actor(&self) -> Option<RBActorWrapper> {
         unsafe {
-            RBActorWrapper::new(RBActor_TA_Get_WeldedActor(self.addr()))
+            RBActorWrapper::try_new(RBActor_TA_Get_WeldedActor(self.addr()))
         }
     }
-    fn get_welded_to(&self) -> RBActorWrapper {
+    fn get_welded_to(&self) -> Option<RBActorWrapper> {
         unsafe {
-            RBActorWrapper::new(RBActor_TA_Get_WeldedTo(self.addr()))
+            RBActorWrapper::try_new(RBActor_TA_Get_WeldedTo(self.addr()))
         }
     }
     fn get_pre_weld_mass(&self) -> f32 {

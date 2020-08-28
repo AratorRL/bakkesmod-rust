@@ -31,14 +31,14 @@ pub trait GameEditor : Server {
 			GameEvent_GameEditor_TA_Get_MaxUndoHistory(self.addr())
 		}
 	}
-	fn get_fx_actor_archetype(&self) -> FXActorWrapper {
+	fn get_fx_actor_archetype(&self) -> Option<FXActorWrapper> {
 		unsafe {
-			FXActorWrapper::new(GameEvent_GameEditor_TA_Get_FXActorArchetype(self.addr()))
+			FXActorWrapper::try_new(GameEvent_GameEditor_TA_Get_FXActorArchetype(self.addr()))
 		}
 	}
-	fn get_fx_actor(&self) -> FXActorWrapper {
+	fn get_fx_actor(&self) -> Option<FXActorWrapper> {
 		unsafe {
-			FXActorWrapper::new(GameEvent_GameEditor_TA_Get_FXActor(self.addr()))
+			FXActorWrapper::try_new(GameEvent_GameEditor_TA_Get_FXActor(self.addr()))
 		}
 	}
 	fn rotate_actor(&self, pc: PlayerControllerWrapper, b_snap_orientation: bool) {

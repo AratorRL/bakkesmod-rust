@@ -70,14 +70,14 @@ pub trait VehicleSim : Object {
             VehicleSim_TA_Get_OutputHandbrake(self.addr())
         }
     }
-    fn get_vehicle(&self) -> VehicleWrapper {
+    fn get_vehicle(&self) -> Option<VehicleWrapper> {
         unsafe {
-            VehicleWrapper::new(VehicleSim_TA_Get_Vehicle(self.addr()))
+            VehicleWrapper::try_new(VehicleSim_TA_Get_Vehicle(self.addr()))
         }
     }
-    fn get_car(&self) -> CarWrapper {
+    fn get_car(&self) -> Option<CarWrapper> {
         unsafe {
-            CarWrapper::new(VehicleSim_TA_Get_Car(self.addr()))
+            CarWrapper::try_new(VehicleSim_TA_Get_Car(self.addr()))
         }
     }
     fn get_steering_sensitivity(&self) -> f32 {

@@ -65,14 +65,14 @@ pub trait TrainingEditor : GameEditor {
             RLArray::from_raw(result)
         }
     }
-    fn get_goal_mesh_blocker_archetype(&self) -> ActorWrapper {
+    fn get_goal_mesh_blocker_archetype(&self) -> Option<ActorWrapper> {
         unsafe {
-            ActorWrapper::new(GameEvent_TrainingEditor_TA_Get_GoalMeshBlockerArchetype(self.addr()))
+            ActorWrapper::try_new(GameEvent_TrainingEditor_TA_Get_GoalMeshBlockerArchetype(self.addr()))
         }
     }
-    fn get_training_data(&self) -> GameEditorSaveDataWrapper {
+    fn get_training_data(&self) -> Option<GameEditorSaveDataWrapper> {
         unsafe {
-            GameEditorSaveDataWrapper::new(GameEvent_TrainingEditor_TA_Get_TrainingData(self.addr()))
+            GameEditorSaveDataWrapper::try_new(GameEvent_TrainingEditor_TA_Get_TrainingData(self.addr()))
         }
     }
     fn get_save_delay_time(&self) -> f32 {
@@ -257,13 +257,13 @@ pub trait TrainingEditor : GameEditor {
             result
         }
     }
-    fn spawn_archetype_at_and_adjust_to_floor(&self, archetype: ActorWrapper, spawn_location: Vector, spawn_rotation: Rotator) -> ActorWrapper {
+    fn spawn_archetype_at_and_adjust_to_floor(&self, archetype: ActorWrapper, spawn_location: Vector, spawn_rotation: Rotator) -> Option<ActorWrapper> {
         unsafe {
             let mut spawn_location = spawn_location;
             let spawn_location: *mut Vector = &mut spawn_location as *mut Vector;
             let mut spawn_rotation = spawn_rotation;
             let spawn_rotation: *mut Rotator = &mut spawn_rotation as *mut Rotator;
-            ActorWrapper::new(GameEvent_TrainingEditor_TA_SpawnArchetypeAtAndAdjustToFloor(self.addr(), archetype.addr(), spawn_location, spawn_rotation))
+            ActorWrapper::try_new(GameEvent_TrainingEditor_TA_SpawnArchetypeAtAndAdjustToFloor(self.addr(), archetype.addr(), spawn_location, spawn_rotation))
         }
     }
     fn spawn_ball_and_start_point_at(&self, ball_spawn_location: Vector, ball_spawn_rotation: Rotator, start_point_spawn_location: Vector, start_point_spawn_rotation: Rotator) {

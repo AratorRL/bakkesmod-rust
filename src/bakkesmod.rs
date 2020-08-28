@@ -326,33 +326,29 @@ pub fn is_paused() -> bool {
     unsafe { IsPaused() }
 }
     
-pub fn get_online_game() -> ServerWrapper {
-    unsafe { ServerWrapper::new(GetOnlineGame()) }
+pub fn get_online_game() -> Option<ServerWrapper> {
+    unsafe { ServerWrapper::try_new(GetOnlineGame()) }
 }
 
-pub fn get_game_event_as_server() -> ServerWrapper {
-    unsafe { ServerWrapper::new(GetGameEventAsServer()) }
+pub fn get_game_event_as_server() -> Option<ServerWrapper> {
+    unsafe { ServerWrapper::try_new(GetGameEventAsServer()) }
 }
 
 pub fn get_local_car() -> Option<CarWrapper> {
     info!("calling get_local_car()");
-    let p_car = unsafe { GetLocalCar() };
-    match p_car {
-        0 => None,
-        _ => Some(CarWrapper(p_car))
-    }
+    unsafe { CarWrapper::try_new(GetLocalCar()) }
 }
 
-pub fn get_camera() -> CameraWrapper {
-    unsafe { CameraWrapper::new(GetCamera()) }
+pub fn get_camera() -> Option<CameraWrapper> {
+    unsafe { CameraWrapper::try_new(GetCamera()) }
 }
 
-pub fn get_engine() -> EngineTAWrapper {
-    unsafe { EngineTAWrapper::new(GetEngine()) }
+pub fn get_engine() -> Option<EngineTAWrapper> {
+    unsafe { EngineTAWrapper::try_new(GetEngine()) }
 }
 
-pub fn get_player_controller() -> PlayerControllerWrapper {
-    unsafe { PlayerControllerWrapper::new(GetPlayerController()) }
+pub fn get_player_controller() -> Option<PlayerControllerWrapper> {
+    unsafe { PlayerControllerWrapper::try_new(GetPlayerController()) }
 }
 
 

@@ -58,14 +58,14 @@ pub trait ReplayDirector : Actor {
             ReplayDirector_TA_Get_TimeBeforeHighlightReplay(self.addr())
         }
     }
-    fn get_replay(&self) -> ReplaySoccarWrapper {
+    fn get_replay(&self) -> Option<ReplaySoccarWrapper> {
         unsafe {
-            ReplaySoccarWrapper::new(ReplayDirector_TA_Get_Replay(self.addr()))
+            ReplaySoccarWrapper::try_new(ReplayDirector_TA_Get_Replay(self.addr()))
         }
     }
-    fn get_focus_car(&self) -> ActorWrapper {
+    fn get_focus_car(&self) -> Option<ActorWrapper> {
         unsafe {
-            ActorWrapper::new(ReplayDirector_TA_Get_FocusCar(self.addr()))
+            ActorWrapper::try_new(ReplayDirector_TA_Get_FocusCar(self.addr()))
         }
     }
     fn get_focus_car_change_time(&self) -> f32 {
@@ -73,9 +73,9 @@ pub trait ReplayDirector : Actor {
             ReplayDirector_TA_Get_FocusCarChangeTime(self.addr())
         }
     }
-    fn get_focus_ball(&self) -> ActorWrapper {
+    fn get_focus_ball(&self) -> Option<ActorWrapper> {
         unsafe {
-            ActorWrapper::new(ReplayDirector_TA_Get_FocusBall(self.addr()))
+            ActorWrapper::try_new(ReplayDirector_TA_Get_FocusBall(self.addr()))
         }
     }
     fn get_score_time(&self) -> f32 {
@@ -88,9 +88,9 @@ pub trait ReplayDirector : Actor {
             ReplayDirector_TA_Get_ScoreHitIndex(self.addr())
         }
     }
-    fn get_scored_goal(&self) -> GoalWrapper {
+    fn get_scored_goal(&self) -> Option<GoalWrapper> {
         unsafe {
-            GoalWrapper::new(ReplayDirector_TA_Get_ScoredGoal(self.addr()))
+            GoalWrapper::try_new(ReplayDirector_TA_Get_ScoredGoal(self.addr()))
         }
     }
     fn get_b_slomo(&self) -> bool {
@@ -128,9 +128,9 @@ pub trait ReplayDirector : Actor {
             ReplayDirector_TA_Get_BallSpawnTime(self.addr())
         }
     }
-    fn get_soccar_game(&self) -> ServerWrapper {
+    fn get_soccar_game(&self) -> Option<ServerWrapper> {
         unsafe {
-            ServerWrapper::new(ReplayDirector_TA_Get_SoccarGame(self.addr()))
+            ServerWrapper::try_new(ReplayDirector_TA_Get_SoccarGame(self.addr()))
         }
     }
     fn get_scored_on_team(&self) -> u8 {

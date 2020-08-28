@@ -7,17 +7,17 @@ impl_object!(PrimitiveComponentWrapper);
 impl PrimitiveComponent for PrimitiveComponentWrapper {}
 
 pub trait PrimitiveComponent : Object {
-    fn get_rb_channel(&self) -> u8 {
-        unsafe {
-            PrimitiveComponent_Get_RBChannel(self.addr())
-        }
-    }
-    fn get_rb_dominance_group(&self) -> u8 {
-        unsafe {
-            PrimitiveComponent_Get_RBDominanceGroup(self.addr())
-        }
-    }
-    fn get_b_only_block_actor_movement(&self) -> bool {
+	fn get_rb_channel(&self) -> u8 {
+		unsafe {
+			PrimitiveComponent_Get_RBChannel(self.addr())
+		}
+	}
+	fn get_rb_dominance_group(&self) -> u8 {
+		unsafe {
+			PrimitiveComponent_Get_RBDominanceGroup(self.addr())
+		}
+	}
+	fn get_b_only_block_actor_movement(&self) -> bool {
 		unsafe {
 			PrimitiveComponent_Get_bOnlyBlockActorMovement(self.addr())
 		}

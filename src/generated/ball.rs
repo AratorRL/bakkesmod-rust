@@ -1,6 +1,6 @@
 use crate::wrappers::*;
-use crate::custom::*;
 use crate::generated::*;
+use crate::custom::*;
 
 pub struct BallWrapper(pub usize);
 impl_object!(BallWrapper);
@@ -12,9 +12,9 @@ impl Actor for BallWrapper {}
 impl CustomWrappers for BallWrapper {}
 
 pub trait Ball : RBActor {
-    fn get_end_of_game_fx_archetype(&self) -> FXActorWrapper {
+    fn get_end_of_game_fx_archetype(&self) -> Option<FXActorWrapper> {
         unsafe {
-            FXActorWrapper::new(Ball_TA_Get_EndOfGameFXArchetype(self.addr()))
+            FXActorWrapper::try_new(Ball_TA_Get_EndOfGameFXArchetype(self.addr()))
         }
     }
     fn get_b_allow_player_explosion_override(&self) -> bool {
@@ -133,9 +133,9 @@ pub trait Ball : RBActor {
             Ball_TA_Get_HitTeamNum(self.addr())
         }
     }
-    fn get_game_event(&self) -> ServerWrapper {
+    fn get_game_event(&self) -> Option<ServerWrapper> {
         unsafe {
-            ServerWrapper::new(Ball_TA_Get_GameEvent(self.addr()))
+            ServerWrapper::try_new(Ball_TA_Get_GameEvent(self.addr()))
         }
     }
     fn get_explosion_time(&self) -> f32 {
@@ -166,9 +166,9 @@ pub trait Ball : RBActor {
             Ball_TA_Get_GroundForce(self.addr())
         }
     }
-    fn get_current_affector(&self) -> CarWrapper {
+    fn get_current_affector(&self) -> Option<CarWrapper> {
         unsafe {
-            CarWrapper::new(Ball_TA_Get_CurrentAffector(self.addr()))
+            CarWrapper::try_new(Ball_TA_Get_CurrentAffector(self.addr()))
         }
     }
     fn get_trajectory_start_velocity(&self) -> Vector {

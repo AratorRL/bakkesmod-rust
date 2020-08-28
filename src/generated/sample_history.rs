@@ -7,9 +7,9 @@ impl_object!(SampleHistoryWrapper);
 impl SampleHistory for SampleHistoryWrapper {}
 
 pub trait SampleHistory : Object {
-    fn get_record_settings(&self) -> SampleRecordSettingsWrapper {
+    fn get_record_settings(&self) -> Option<SampleRecordSettingsWrapper> {
         unsafe {
-            SampleRecordSettingsWrapper::new(SampleHistory_TA_Get_RecordSettings(self.addr()))
+            SampleRecordSettingsWrapper::try_new(SampleHistory_TA_Get_RecordSettings(self.addr()))
         }
     }
     fn get_title(&self) -> RLString {
@@ -91,26 +91,26 @@ pub trait SampleHistory : Object {
             SampleHistory_TA_GetSummaryValue(self.addr(), type_, max_sample_age, b_absolute_value)
         }
     }
-    fn set_base_value2(&self, in_base_value: f32) -> SampleHistoryWrapper {
+    fn set_base_value2(&self, in_base_value: f32) -> Option<SampleHistoryWrapper> {
         unsafe {
-            SampleHistoryWrapper::new(SampleHistory_TA_SetBaseValue2(self.addr(), in_base_value))
+            SampleHistoryWrapper::try_new(SampleHistory_TA_SetBaseValue2(self.addr(), in_base_value))
         }
     }
-    fn set_good_bad_values(&self, in_good_value: f32, in_bad_value: f32) -> SampleHistoryWrapper {
+    fn set_good_bad_values(&self, in_good_value: f32, in_bad_value: f32) -> Option<SampleHistoryWrapper> {
         unsafe {
-            SampleHistoryWrapper::new(SampleHistory_TA_SetGoodBadValues(self.addr(), in_good_value, in_bad_value))
+            SampleHistoryWrapper::try_new(SampleHistory_TA_SetGoodBadValues(self.addr(), in_good_value, in_bad_value))
         }
     }
-    fn set_graph_max_min(&self, max_value: f32, min_value: f32) -> SampleHistoryWrapper {
+    fn set_graph_max_min(&self, max_value: f32, min_value: f32) -> Option<SampleHistoryWrapper> {
         unsafe {
-            SampleHistoryWrapper::new(SampleHistory_TA_SetGraphMaxMin(self.addr(), max_value, min_value))
+            SampleHistoryWrapper::try_new(SampleHistory_TA_SetGraphMaxMin(self.addr(), max_value, min_value))
         }
     }
-    fn set_title(&self, in_title: RLString) -> SampleHistoryWrapper {
+    fn set_title(&self, in_title: RLString) -> Option<SampleHistoryWrapper> {
         unsafe {
             let mut in_title = in_title;
             let in_title: *mut RLString = &mut in_title as *mut RLString;
-            SampleHistoryWrapper::new(SampleHistory_TA_SetTitle(self.addr(), in_title))
+            SampleHistoryWrapper::try_new(SampleHistory_TA_SetTitle(self.addr(), in_title))
         }
     }
 

@@ -1,6 +1,6 @@
 use crate::wrappers::*;
-use crate::custom::*;
 use crate::generated::*;
+use crate::custom::*;
 
 pub struct CarWrapper(pub usize);
 impl_object!(CarWrapper);
@@ -12,7 +12,6 @@ impl Actor for CarWrapper {}
 
 impl CustomWrappers for CarWrapper {}
 
-
 pub trait Car : Vehicle {
     fn get_default_car_components(&self) -> RLArray<CarComponentWrapper> {
         unsafe {
@@ -22,9 +21,9 @@ pub trait Car : Vehicle {
             RLArray::from_raw(result)
         }
     }
-    fn get_flip_component(&self) -> FlipCarComponentWrapper {
+    fn get_flip_component(&self) -> Option<FlipCarComponentWrapper> {
         unsafe {
-            FlipCarComponentWrapper::new(Car_TA_Get_FlipComponent(self.addr()))
+            FlipCarComponentWrapper::try_new(Car_TA_Get_FlipComponent(self.addr()))
         }
     }
     fn get_demolish_target(&self) -> u8 {
@@ -72,9 +71,9 @@ pub trait Car : Vehicle {
             Car_TA_Get_bOverrideBoostOn(self.addr())
         }
     }
-    fn get_exit_fx_archetype(&self) -> FXActorWrapper {
+    fn get_exit_fx_archetype(&self) -> Option<FXActorWrapper> {
         unsafe {
-            FXActorWrapper::new(Car_TA_Get_ExitFXArchetype(self.addr()))
+            FXActorWrapper::try_new(Car_TA_Get_ExitFXArchetype(self.addr()))
         }
     }
     fn get_max_time_for_dodge(&self) -> f32 {
@@ -92,14 +91,14 @@ pub trait Car : Vehicle {
             Car_TA_Get_ReplicatedCarScale(self.addr())
         }
     }
-    fn get_body_fx_actor(&self) -> FXActorWrapper {
+    fn get_body_fx_actor(&self) -> Option<FXActorWrapper> {
         unsafe {
-            FXActorWrapper::new(Car_TA_Get_BodyFXActor(self.addr()))
+            FXActorWrapper::try_new(Car_TA_Get_BodyFXActor(self.addr()))
         }
     }
-    fn get_attacker_pri(&self) -> PriWrapper {
+    fn get_attacker_pri(&self) -> Option<PriWrapper> {
         unsafe {
-            PriWrapper::new(Car_TA_Get_AttackerPRI(self.addr()))
+            PriWrapper::try_new(Car_TA_Get_AttackerPRI(self.addr()))
         }
     }
     fn get_mouse_accel(&self) -> Vector {
@@ -118,9 +117,9 @@ pub trait Car : Vehicle {
             result
         }
     }
-    fn get_attached_pickup(&self) -> RumblePickupComponentWrapper {
+    fn get_attached_pickup(&self) -> Option<RumblePickupComponentWrapper> {
         unsafe {
-            RumblePickupComponentWrapper::new(Car_TA_Get_AttachedPickup(self.addr()))
+            RumblePickupComponentWrapper::try_new(Car_TA_Get_AttachedPickup(self.addr()))
         }
     }
     fn get_replay_focus_offset(&self) -> Vector {
@@ -141,9 +140,9 @@ pub trait Car : Vehicle {
             Car_TA_Get_AddedCarForceMultiplier(self.addr())
         }
     }
-    fn get_game_event(&self) -> GameEventWrapper {
+    fn get_game_event(&self) -> Option<GameEventWrapper> {
         unsafe {
-            GameEventWrapper::new(Car_TA_Get_GameEvent(self.addr()))
+            GameEventWrapper::try_new(Car_TA_Get_GameEvent(self.addr()))
         }
     }
     fn get_max_drive_backwards_speed(&self) -> f32 {
@@ -274,9 +273,9 @@ pub trait Car : Vehicle {
             Car_TA_AnyWheelTouchingGround(self.addr())
         }
     }
-    fn give_car_component(&self, component_archetype: CarComponentWrapper, activator: PriWrapper) -> CarComponentWrapper {
+    fn give_car_component(&self, component_archetype: CarComponentWrapper, activator: PriWrapper) -> Option<CarComponentWrapper> {
         unsafe {
-            CarComponentWrapper::new(Car_TA_GiveCarComponent(self.addr(), component_archetype.addr(), activator.addr()))
+            CarComponentWrapper::try_new(Car_TA_GiveCarComponent(self.addr(), component_archetype.addr(), activator.addr()))
         }
     }
     fn add_default_car_components(&self) {

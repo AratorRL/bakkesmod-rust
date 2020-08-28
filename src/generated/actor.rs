@@ -66,14 +66,14 @@ pub trait Actor : Object {
 			Actor_Get_ReplicatedCollisionType(self.addr())
 		}
 	}
-	fn get_owner(&self) -> ActorWrapper {
+	fn get_owner(&self) -> Option<ActorWrapper> {
 		unsafe {
-			ActorWrapper::new(Actor_Get_Owner(self.addr()))
+			ActorWrapper::try_new(Actor_Get_Owner(self.addr()))
 		}
 	}
-	fn get_base(&self) -> ActorWrapper {
+	fn get_base(&self) -> Option<ActorWrapper> {
 		unsafe {
-			ActorWrapper::new(Actor_Get_Base(self.addr()))
+			ActorWrapper::try_new(Actor_Get_Base(self.addr()))
 		}
 	}
 	fn get_b_static(&self) -> bool {
@@ -385,9 +385,9 @@ pub trait Actor : Object {
 			result
 		}
 	}
-	fn get_collision_component(&self) -> PrimitiveComponentWrapper {
+	fn get_collision_component(&self) -> Option<PrimitiveComponentWrapper> {
 		unsafe {
-			PrimitiveComponentWrapper::new(Actor_Get_CollisionComponent(self.addr()))
+			PrimitiveComponentWrapper::try_new(Actor_Get_CollisionComponent(self.addr()))
 		}
 	}
 	fn force_net_update_packet(&self) {

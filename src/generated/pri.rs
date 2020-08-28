@@ -130,19 +130,19 @@ pub trait Pri : PriX {
 			PRI_TA_Get_PlayerHistoryValid(self.addr())
 		}
 	}
-	fn get_game_event(&self) -> GameEventWrapper {
+	fn get_game_event(&self) -> Option<GameEventWrapper> {
 		unsafe {
-			GameEventWrapper::new(PRI_TA_Get_GameEvent(self.addr()))
+			GameEventWrapper::try_new(PRI_TA_Get_GameEvent(self.addr()))
 		}
 	}
-	fn get_replicated_game_event(&self) -> GameEventWrapper {
+	fn get_replicated_game_event(&self) -> Option<GameEventWrapper> {
 		unsafe {
-			GameEventWrapper::new(PRI_TA_Get_ReplicatedGameEvent(self.addr()))
+			GameEventWrapper::try_new(PRI_TA_Get_ReplicatedGameEvent(self.addr()))
 		}
 	}
-	fn get_car(&self) -> CarWrapper {
+	fn get_car(&self) -> Option<CarWrapper> {
 		unsafe {
-			CarWrapper::new(PRI_TA_Get_Car(self.addr()))
+			CarWrapper::try_new(PRI_TA_Get_Car(self.addr()))
 		}
 	}
 	fn get_waiting_start_time(&self) -> i32 {
@@ -231,9 +231,9 @@ pub trait Pri : PriX {
 			PRI_TA_Get_CarTouches(self.addr())
 		}
 	}
-	fn get_replacing_bot_pri(&self) -> PriWrapper {
+	fn get_replacing_bot_pri(&self) -> Option<PriWrapper> {
 		unsafe {
-			PriWrapper::new(PRI_TA_Get_ReplacingBotPRI(self.addr()))
+			PriWrapper::try_new(PRI_TA_Get_ReplacingBotPRI(self.addr()))
 		}
 	}
 	fn get_club_id(&self) -> i64 {

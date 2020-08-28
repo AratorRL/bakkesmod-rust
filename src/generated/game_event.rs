@@ -8,9 +8,9 @@ impl GameEvent for GameEventWrapper {}
 impl Actor for GameEventWrapper {}
 
 pub trait GameEvent : Actor {
-	fn get_car_archetype(&self) -> CarWrapper {
+	fn get_car_archetype(&self) -> Option<CarWrapper> {
 		unsafe {
-			CarWrapper::new(GameEvent_TA_Get_CarArchetype(self.addr()))
+			CarWrapper::try_new(GameEvent_TA_Get_CarArchetype(self.addr()))
 		}
 	}
 	fn get_countdown_time(&self) -> i32 {
@@ -106,14 +106,14 @@ pub trait GameEvent : Actor {
 			GameEvent_TA_Get_MatchTimeDilation(self.addr())
 		}
 	}
-	fn get_activator(&self) -> PlayerControllerWrapper {
+	fn get_activator(&self) -> Option<PlayerControllerWrapper> {
 		unsafe {
-			PlayerControllerWrapper::new(GameEvent_TA_Get_Activator(self.addr()))
+			PlayerControllerWrapper::try_new(GameEvent_TA_Get_Activator(self.addr()))
 		}
 	}
-	fn get_activator_car(&self) -> CarWrapper {
+	fn get_activator_car(&self) -> Option<CarWrapper> {
 		unsafe {
-			CarWrapper::new(GameEvent_TA_Get_ActivatorCar(self.addr()))
+			CarWrapper::try_new(GameEvent_TA_Get_ActivatorCar(self.addr()))
 		}
 	}
 	fn get_pr_is(&self) -> RLArray<PriWrapper> {
@@ -176,9 +176,9 @@ pub trait GameEvent : Actor {
 			RLArray::from_raw(result)
 		}
 	}
-	fn get_game_owner(&self) -> PriWrapper {
+	fn get_game_owner(&self) -> Option<PriWrapper> {
 		unsafe {
-			PriWrapper::new(GameEvent_TA_Get_GameOwner(self.addr()))
+			PriWrapper::try_new(GameEvent_TA_Get_GameOwner(self.addr()))
 		}
 	}
 	fn get_rich_presence_string(&self) -> RLString {
@@ -209,11 +209,11 @@ pub trait GameEvent : Actor {
 			GameEvent_TA_AllowReadyUp(self.addr());
 		}
 	}
-	fn find_player_pri(&self, unique_id: UniqueNetId) -> PriWrapper {
+	fn find_player_pri(&self, unique_id: UniqueNetId) -> Option<PriWrapper> {
 		unsafe {
 			let mut unique_id = unique_id;
 			let unique_id: *mut UniqueNetId = &mut unique_id as *mut UniqueNetId;
-			PriWrapper::new(GameEvent_TA_FindPlayerPRI(self.addr(), unique_id))
+			PriWrapper::try_new(GameEvent_TA_FindPlayerPRI(self.addr(), unique_id))
 		}
 	}
 	fn handle_player_removed(&self, game_event: GameEventWrapper, pri: PriWrapper) {
@@ -256,11 +256,11 @@ pub trait GameEvent : Actor {
 			GameEvent_TA_CheckInitiatedForfeit(self.addr(), pri.addr());
 		}
 	}
-	fn find_pc_for_unique_id(&self, player_id: UniqueNetId) -> PlayerControllerWrapper {
+	fn find_pc_for_unique_id(&self, player_id: UniqueNetId) -> Option<PlayerControllerWrapper> {
 		unsafe {
 			let mut player_id = player_id;
 			let player_id: *mut UniqueNetId = &mut player_id as *mut UniqueNetId;
-			PlayerControllerWrapper::new(GameEvent_TA_FindPCForUniqueID(self.addr(), player_id))
+			PlayerControllerWrapper::try_new(GameEvent_TA_FindPCForUniqueID(self.addr(), player_id))
 		}
 	}
 	fn allow_split_screen_player(&self) -> bool {
@@ -454,9 +454,9 @@ pub trait GameEvent : Actor {
 			GameEvent_TA_SetBotSkill2(self.addr(), new_skill);
 		}
 	}
-	fn get_local_primary_player(&self) -> PlayerControllerWrapper {
+	fn get_local_primary_player(&self) -> Option<PlayerControllerWrapper> {
 		unsafe {
-			PlayerControllerWrapper::new(GameEvent_TA_GetLocalPrimaryPlayer(self.addr()))
+			PlayerControllerWrapper::try_new(GameEvent_TA_GetLocalPrimaryPlayer(self.addr()))
 		}
 	}
 	fn has_player_named(&self, player_name: RLString) -> bool {
@@ -652,9 +652,9 @@ pub trait GameEvent : Actor {
 			GameEvent_TA_UpdateLeaveMatchPenalty(self.addr());
 		}
 	}
-	fn get_playlist(&self) -> GameSettingPlaylistWrapper {
+	fn get_playlist(&self) -> Option<GameSettingPlaylistWrapper> {
 		unsafe {
-			GameSettingPlaylistWrapper::new(GameEvent_TA_GetPlaylist(self.addr()))
+			GameSettingPlaylistWrapper::try_new(GameEvent_TA_GetPlaylist(self.addr()))
 		}
 	}
 	fn should_have_leave_match_penalty(&self) -> bool {

@@ -8,29 +8,29 @@ impl PerfStatGraph for PerfStatGraphWrapper {}
 impl StatGraph for PerfStatGraphWrapper {}
 
 pub trait PerfStatGraph : StatGraph {
-	fn get_fps(&self) -> SampleHistoryWrapper {
+	fn get_fps(&self) -> Option<SampleHistoryWrapper> {
 		unsafe {
-			SampleHistoryWrapper::new(PerfStatGraph_TA_Get_FPS(self.addr()))
+			SampleHistoryWrapper::try_new(PerfStatGraph_TA_Get_FPS(self.addr()))
 		}
 	}
-	fn get_frame_time(&self) -> SampleHistoryWrapper {
+	fn get_frame_time(&self) -> Option<SampleHistoryWrapper> {
 		unsafe {
-			SampleHistoryWrapper::new(PerfStatGraph_TA_Get_FrameTime(self.addr()))
+			SampleHistoryWrapper::try_new(PerfStatGraph_TA_Get_FrameTime(self.addr()))
 		}
 	}
-	fn get_game_thread_time(&self) -> SampleHistoryWrapper {
+	fn get_game_thread_time(&self) -> Option<SampleHistoryWrapper> {
 		unsafe {
-			SampleHistoryWrapper::new(PerfStatGraph_TA_Get_GameThreadTime(self.addr()))
+			SampleHistoryWrapper::try_new(PerfStatGraph_TA_Get_GameThreadTime(self.addr()))
 		}
 	}
-	fn get_render_thread_time(&self) -> SampleHistoryWrapper {
+	fn get_render_thread_time(&self) -> Option<SampleHistoryWrapper> {
 		unsafe {
-			SampleHistoryWrapper::new(PerfStatGraph_TA_Get_RenderThreadTime(self.addr()))
+			SampleHistoryWrapper::try_new(PerfStatGraph_TA_Get_RenderThreadTime(self.addr()))
 		}
 	}
-	fn get_gpu_frame_time(&self) -> SampleHistoryWrapper {
+	fn get_gpu_frame_time(&self) -> Option<SampleHistoryWrapper> {
 		unsafe {
-			SampleHistoryWrapper::new(PerfStatGraph_TA_Get_GPUFrameTime(self.addr()))
+			SampleHistoryWrapper::try_new(PerfStatGraph_TA_Get_GPUFrameTime(self.addr()))
 		}
 	}
 	fn get_frame_time_histories(&self) -> RLArray<SampleHistoryWrapper> {
@@ -51,18 +51,18 @@ pub trait PerfStatGraph : StatGraph {
 			PerfStatGraph_TA_Get_TargetFPS(self.addr())
 		}
 	}
-	fn create_frame_time_history(&self, title: RLString) -> SampleHistoryWrapper {
+	fn create_frame_time_history(&self, title: RLString) -> Option<SampleHistoryWrapper> {
 		unsafe {
 			let mut title = title;
 			let title: *mut RLString = &mut title as *mut RLString;
-			SampleHistoryWrapper::new(PerfStatGraph_TA_CreateFrameTimeHistory(self.addr(), title))
+			SampleHistoryWrapper::try_new(PerfStatGraph_TA_CreateFrameTimeHistory(self.addr(), title))
 		}
 	}
-	fn create_fps_history(&self, title: RLString) -> SampleHistoryWrapper {
+	fn create_fps_history(&self, title: RLString) -> Option<SampleHistoryWrapper> {
 		unsafe {
 			let mut title = title;
 			let title: *mut RLString = &mut title as *mut RLString;
-			SampleHistoryWrapper::new(PerfStatGraph_TA_CreateFpsHistory(self.addr(), title))
+			SampleHistoryWrapper::try_new(PerfStatGraph_TA_CreateFpsHistory(self.addr(), title))
 		}
 	}
 

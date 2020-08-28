@@ -381,6 +381,10 @@ impl<T: UnrealPointer> RLArray<T> {
         RLArrayRaw { data: self.data as usize, count: 0, max: 0 }
     }
 
+    pub fn len(&self) -> isize {
+        self.count as isize
+    }
+
     pub fn get(&self, index: isize) -> T {
         unsafe { 
             let ptr = self.data.offset(index);

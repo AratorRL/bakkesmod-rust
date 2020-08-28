@@ -84,9 +84,9 @@ pub trait Wheel : Object {
             result
         }
     }
-    fn get_vehicle_sim(&self) -> VehicleSimWrapper {
+    fn get_vehicle_sim(&self) -> Option<VehicleSimWrapper> {
         unsafe {
-            VehicleSimWrapper::new(Wheel_TA_Get_VehicleSim(self.addr()))
+            VehicleSimWrapper::try_new(Wheel_TA_Get_VehicleSim(self.addr()))
         }
     }
     fn get_wheel_index(&self) -> i32 {

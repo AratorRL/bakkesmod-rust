@@ -204,9 +204,9 @@ pub trait Replay : Object {
             Replay_TA_RemoveTimelineKeyframe(self.addr(), keyframe_index);
         }
     }
-    fn create_copy(&self, start_time: f32) -> ReplayWrapper {
+    fn create_copy(&self, start_time: f32) -> Option<ReplayWrapper> {
         unsafe {
-            ReplayWrapper::new(Replay_TA_CreateCopy(self.addr(), start_time))
+            ReplayWrapper::try_new(Replay_TA_CreateCopy(self.addr(), start_time))
         }
     }
     fn import_replay(&self, path: RLString) {

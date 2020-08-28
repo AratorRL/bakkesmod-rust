@@ -86,7 +86,7 @@ pub fn on_load() {
                         let location = car.get_location();
                         log_console!("{}", location);
 
-                        let vehicle_sim = car.get_vehicle_sim();
+                        let vehicle_sim = car.get_vehicle_sim().unwrap();
                         info!("got vehicle sim: {:x?}", vehicle_sim.addr());
                         let wheels = vehicle_sim.get_wheels();
                         info!("got wheels: {:x?}", wheels.data);
@@ -137,7 +137,29 @@ pub fn on_load() {
     }));
 
     bakkesmod::register_notifier("rust_get_ball_info", Box::new(move |_: Vec<String>| {
-        // bakkesmod::get_game_event_as_server()
+        let game = match bakkesmod::get_game_event_as_server() {
+            Some(g) => g,
+            None => {
+                log_console!("game is null!");
+                return;
+            }
+        };
+        
+        // let balls = game.get_game_balls();
+        // let ball = {
+        //     let balls = game.get_game_balls();
+        //     if balls.len() < 1 {
+        //         log_console!("you don't have any balls!");
+        //         return;
+        //     }
+        //     balls.get(0)
+        // };
+
+        match game.get_ball() {
+            Some(ball) => log_console!("{}", ball.get_location()),
+            None => log_console!("ball is NULL")
+        };
+
     }));
 
     // bakkesmod::hook_event_with_caller(

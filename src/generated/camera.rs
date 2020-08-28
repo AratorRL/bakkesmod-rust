@@ -56,9 +56,9 @@ pub trait Camera : CameraX {
 			result
 		}
 	}
-	fn get_demolisher(&self) -> RBActorWrapper {
+	fn get_demolisher(&self) -> Option<RBActorWrapper> {
 		unsafe {
-			RBActorWrapper::new(Camera_TA_Get_Demolisher(self.addr()))
+			RBActorWrapper::try_new(Camera_TA_Get_Demolisher(self.addr()))
 		}
 	}
 	fn get_b_demolished(&self) -> bool {

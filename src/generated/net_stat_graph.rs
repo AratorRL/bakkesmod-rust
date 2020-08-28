@@ -8,39 +8,39 @@ impl NetStatGraph for NetStatGraphWrapper {}
 impl StatGraph for NetStatGraphWrapper {}
 
 pub trait NetStatGraph : StatGraph {
-	fn get_packets_out(&self) -> SampleHistoryWrapper {
+	fn get_packets_out(&self) -> Option<SampleHistoryWrapper> {
 		unsafe {
-			SampleHistoryWrapper::new(NetStatGraph_TA_Get_PacketsOut(self.addr()))
+			SampleHistoryWrapper::try_new(NetStatGraph_TA_Get_PacketsOut(self.addr()))
 		}
 	}
-	fn get_packets_in(&self) -> SampleHistoryWrapper {
+	fn get_packets_in(&self) -> Option<SampleHistoryWrapper> {
 		unsafe {
-			SampleHistoryWrapper::new(NetStatGraph_TA_Get_PacketsIn(self.addr()))
+			SampleHistoryWrapper::try_new(NetStatGraph_TA_Get_PacketsIn(self.addr()))
 		}
 	}
-	fn get_lost_packets_out(&self) -> SampleHistoryWrapper {
+	fn get_lost_packets_out(&self) -> Option<SampleHistoryWrapper> {
 		unsafe {
-			SampleHistoryWrapper::new(NetStatGraph_TA_Get_LostPacketsOut(self.addr()))
+			SampleHistoryWrapper::try_new(NetStatGraph_TA_Get_LostPacketsOut(self.addr()))
 		}
 	}
-	fn get_lost_packets_in(&self) -> SampleHistoryWrapper {
+	fn get_lost_packets_in(&self) -> Option<SampleHistoryWrapper> {
 		unsafe {
-			SampleHistoryWrapper::new(NetStatGraph_TA_Get_LostPacketsIn(self.addr()))
+			SampleHistoryWrapper::try_new(NetStatGraph_TA_Get_LostPacketsIn(self.addr()))
 		}
 	}
-	fn get_bytes_out(&self) -> SampleHistoryWrapper {
+	fn get_bytes_out(&self) -> Option<SampleHistoryWrapper> {
 		unsafe {
-			SampleHistoryWrapper::new(NetStatGraph_TA_Get_BytesOut(self.addr()))
+			SampleHistoryWrapper::try_new(NetStatGraph_TA_Get_BytesOut(self.addr()))
 		}
 	}
-	fn get_bytes_in(&self) -> SampleHistoryWrapper {
+	fn get_bytes_in(&self) -> Option<SampleHistoryWrapper> {
 		unsafe {
-			SampleHistoryWrapper::new(NetStatGraph_TA_Get_BytesIn(self.addr()))
+			SampleHistoryWrapper::try_new(NetStatGraph_TA_Get_BytesIn(self.addr()))
 		}
 	}
-	fn get_latency(&self) -> SampleHistoryWrapper {
+	fn get_latency(&self) -> Option<SampleHistoryWrapper> {
 		unsafe {
-			SampleHistoryWrapper::new(NetStatGraph_TA_Get_Latency(self.addr()))
+			SampleHistoryWrapper::try_new(NetStatGraph_TA_Get_Latency(self.addr()))
 		}
 	}
 	fn get_expected_out_packet_rate(&self) -> f32 {
@@ -58,25 +58,25 @@ pub trait NetStatGraph : StatGraph {
 			NetStatGraph_TA_Get_MaxBytesRate(self.addr())
 		}
 	}
-	fn create_bytes_summary(&self, title: RLString) -> SampleHistoryWrapper {
+	fn create_bytes_summary(&self, title: RLString) -> Option<SampleHistoryWrapper> {
 		unsafe {
 			let mut title = title;
 			let title: *mut RLString = &mut title as *mut RLString;
-			SampleHistoryWrapper::new(NetStatGraph_TA_CreateBytesSummary(self.addr(), title))
+			SampleHistoryWrapper::try_new(NetStatGraph_TA_CreateBytesSummary(self.addr(), title))
 		}
 	}
-	fn create_loss_summary(&self, title: RLString) -> SampleHistoryWrapper {
+	fn create_loss_summary(&self, title: RLString) -> Option<SampleHistoryWrapper> {
 		unsafe {
 			let mut title = title;
 			let title: *mut RLString = &mut title as *mut RLString;
-			SampleHistoryWrapper::new(NetStatGraph_TA_CreateLossSummary(self.addr(), title))
+			SampleHistoryWrapper::try_new(NetStatGraph_TA_CreateLossSummary(self.addr(), title))
 		}
 	}
-	fn create_pkt_summary(&self, title: RLString) -> SampleHistoryWrapper {
+	fn create_pkt_summary(&self, title: RLString) -> Option<SampleHistoryWrapper> {
 		unsafe {
 			let mut title = title;
 			let title: *mut RLString = &mut title as *mut RLString;
-			SampleHistoryWrapper::new(NetStatGraph_TA_CreatePktSummary(self.addr(), title))
+			SampleHistoryWrapper::try_new(NetStatGraph_TA_CreatePktSummary(self.addr(), title))
 		}
 	}
 

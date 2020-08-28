@@ -7,9 +7,9 @@ impl_object!(StatGraphWrapper);
 impl StatGraph for StatGraphWrapper {}
 
 pub trait StatGraph : Object {
-    fn get_record_settings(&self) -> SampleRecordSettingsWrapper {
+    fn get_record_settings(&self) -> Option<SampleRecordSettingsWrapper> {
         unsafe {
-            SampleRecordSettingsWrapper::new(StatGraph_TA_Get_RecordSettings(self.addr()))
+            SampleRecordSettingsWrapper::try_new(StatGraph_TA_Get_RecordSettings(self.addr()))
         }
     }
     fn get_last_tick_time(&self) -> Double {
@@ -33,16 +33,16 @@ pub trait StatGraph : Object {
             StatGraph_TA_StopDrawing(self.addr());
         }
     }
-    fn create_sample_history(&self, title: RLString) -> SampleHistoryWrapper {
+    fn create_sample_history(&self, title: RLString) -> Option<SampleHistoryWrapper> {
         unsafe {
             let mut title = title;
             let title: *mut RLString = &mut title as *mut RLString;
-            SampleHistoryWrapper::new(StatGraph_TA_CreateSampleHistory(self.addr(), title))
+            SampleHistoryWrapper::try_new(StatGraph_TA_CreateSampleHistory(self.addr(), title))
         }
     }
-    fn add_sample_history(&self, history: SampleHistoryWrapper) -> SampleHistoryWrapper {
+    fn add_sample_history(&self, history: SampleHistoryWrapper) -> Option<SampleHistoryWrapper> {
         unsafe {
-            SampleHistoryWrapper::new(StatGraph_TA_AddSampleHistory(self.addr(), history.addr()))
+            SampleHistoryWrapper::try_new(StatGraph_TA_AddSampleHistory(self.addr(), history.addr()))
         }
     }
 

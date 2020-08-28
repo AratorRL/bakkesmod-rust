@@ -9,9 +9,9 @@ impl RBActor for VehicleWrapper {}
 impl Actor for VehicleWrapper {}
 
 pub trait Vehicle : RBActor {
-    fn get_vehicle_sim(&self) -> VehicleSimWrapper {
+    fn get_vehicle_sim(&self) -> Option<VehicleSimWrapper> {
         unsafe {
-            VehicleSimWrapper::new(Vehicle_TA_Get_VehicleSim(self.addr()))
+            VehicleSimWrapper::try_new(Vehicle_TA_Get_VehicleSim(self.addr()))
         }
     }
     fn get_sticky_force(&self) -> StickyForceData {
@@ -75,14 +75,14 @@ pub trait Vehicle : RBActor {
             Vehicle_TA_Get_ReplicatedSteer(self.addr())
         }
     }
-    fn get_player_controller(&self) -> PlayerControllerWrapper {
+    fn get_player_controller(&self) -> Option<PlayerControllerWrapper> {
         unsafe {
-            PlayerControllerWrapper::new(Vehicle_TA_Get_PlayerController(self.addr()))
+            PlayerControllerWrapper::try_new(Vehicle_TA_Get_PlayerController(self.addr()))
         }
     }
-    fn get_pri(&self) -> PriWrapper {
+    fn get_pri(&self) -> Option<PriWrapper> {
         unsafe {
-            PriWrapper::new(Vehicle_TA_Get_PRI(self.addr()))
+            PriWrapper::try_new(Vehicle_TA_Get_PRI(self.addr()))
         }
     }
     fn get_vehicle_update_tag(&self) -> i32 {
@@ -116,29 +116,29 @@ pub trait Vehicle : RBActor {
             Vehicle_TA_Get_LastBallImpactFrame(self.addr())
         }
     }
-    fn get_boost_component(&self) -> BoostWrapper {
+    fn get_boost_component(&self) -> Option<BoostWrapper> {
         unsafe {
-            BoostWrapper::new(Vehicle_TA_Get_BoostComponent(self.addr()))
+            BoostWrapper::try_new(Vehicle_TA_Get_BoostComponent(self.addr()))
         }
     }
-    fn get_dodge_component(&self) -> DodgeComponentWrapper {
+    fn get_dodge_component(&self) -> Option<DodgeComponentWrapper> {
         unsafe {
-            DodgeComponentWrapper::new(Vehicle_TA_Get_DodgeComponent(self.addr()))
+            DodgeComponentWrapper::try_new(Vehicle_TA_Get_DodgeComponent(self.addr()))
         }
     }
-    fn get_air_control_component(&self) -> AirControlComponentWrapper {
+    fn get_air_control_component(&self) -> Option<AirControlComponentWrapper> {
         unsafe {
-            AirControlComponentWrapper::new(Vehicle_TA_Get_AirControlComponent(self.addr()))
+            AirControlComponentWrapper::try_new(Vehicle_TA_Get_AirControlComponent(self.addr()))
         }
     }
-    fn get_jump_component(&self) -> JumpComponentWrapper {
+    fn get_jump_component(&self) -> Option<JumpComponentWrapper> {
         unsafe {
-            JumpComponentWrapper::new(Vehicle_TA_Get_JumpComponent(self.addr()))
+            JumpComponentWrapper::try_new(Vehicle_TA_Get_JumpComponent(self.addr()))
         }
     }
-    fn get_double_jump_component(&self) -> DoubleJumpComponentWrapper {
+    fn get_double_jump_component(&self) -> Option<DoubleJumpComponentWrapper> {
         unsafe {
-            DoubleJumpComponentWrapper::new(Vehicle_TA_Get_DoubleJumpComponent(self.addr()))
+            DoubleJumpComponentWrapper::try_new(Vehicle_TA_Get_DoubleJumpComponent(self.addr()))
         }
     }
     fn get_time_below_supersonic_speed(&self) -> f32 {

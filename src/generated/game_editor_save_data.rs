@@ -16,9 +16,9 @@ pub trait GameEditorSaveData : SaveData {
 			result
 		}
 	}
-	fn get_training_data(&self) -> TrainingEditorSaveDataWrapper {
+	fn get_training_data(&self) -> Option<TrainingEditorSaveDataWrapper> {
 		unsafe {
-			TrainingEditorSaveDataWrapper::new(SaveData_GameEditor_Training_TA_Get_TrainingData(self.addr()))
+			TrainingEditorSaveDataWrapper::try_new(SaveData_GameEditor_Training_TA_Get_TrainingData(self.addr()))
 		}
 	}
 	fn get_player_team_number(&self) -> i32 {

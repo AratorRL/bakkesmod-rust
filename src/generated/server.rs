@@ -1,5 +1,6 @@
 use crate::wrappers::*;
 use crate::generated::*;
+use crate::custom::*;
 
 pub struct ServerWrapper(pub usize);
 impl_object!(ServerWrapper);
@@ -9,20 +10,22 @@ impl TeamGameEvent for ServerWrapper {}
 impl GameEvent for ServerWrapper {}
 impl Actor for ServerWrapper {}
 
+impl CustomWrappers for ServerWrapper {}
+
 pub trait Server : TeamGameEvent {
-    fn get_test_car_archetype(&self) -> CarWrapper {
+    fn get_test_car_archetype(&self) -> Option<CarWrapper> {
         unsafe {
-            CarWrapper::new(GameEvent_Soccar_TA_Get_TestCarArchetype(self.addr()))
+            CarWrapper::try_new(GameEvent_Soccar_TA_Get_TestCarArchetype(self.addr()))
         }
     }
-    fn get_ball_archetype(&self) -> BallWrapper {
+    fn get_ball_archetype(&self) -> Option<BallWrapper> {
         unsafe {
-            BallWrapper::new(GameEvent_Soccar_TA_Get_BallArchetype(self.addr()))
+            BallWrapper::try_new(GameEvent_Soccar_TA_Get_BallArchetype(self.addr()))
         }
     }
-    fn get_ball_spawn_point(&self) -> ActorWrapper {
+    fn get_ball_spawn_point(&self) -> Option<ActorWrapper> {
         unsafe {
-            ActorWrapper::new(GameEvent_Soccar_TA_Get_BallSpawnPoint(self.addr()))
+            ActorWrapper::try_new(GameEvent_Soccar_TA_Get_BallSpawnPoint(self.addr()))
         }
     }
     fn get_series_length(&self) -> i32 {
@@ -140,14 +143,14 @@ pub trait Server : TeamGameEvent {
             GameEvent_Soccar_TA_Get_NextSpawnIndex(self.addr())
         }
     }
-    fn get_replay_director_archetype(&self) -> ReplayDirectorWrapper {
+    fn get_replay_director_archetype(&self) -> Option<ReplayDirectorWrapper> {
         unsafe {
-            ReplayDirectorWrapper::new(GameEvent_Soccar_TA_Get_ReplayDirectorArchetype(self.addr()))
+            ReplayDirectorWrapper::try_new(GameEvent_Soccar_TA_Get_ReplayDirectorArchetype(self.addr()))
         }
     }
-    fn get_replay_director(&self) -> ReplayDirectorWrapper {
+    fn get_replay_director(&self) -> Option<ReplayDirectorWrapper> {
         unsafe {
-            ReplayDirectorWrapper::new(GameEvent_Soccar_TA_Get_ReplayDirector(self.addr()))
+            ReplayDirectorWrapper::try_new(GameEvent_Soccar_TA_Get_ReplayDirector(self.addr()))
         }
     }
     fn get_game_balls(&self) -> RLArray<BallWrapper> {
@@ -189,14 +192,14 @@ pub trait Server : TeamGameEvent {
             result
         }
     }
-    fn get_game_winner(&self) -> TeamWrapper {
+    fn get_game_winner(&self) -> Option<TeamWrapper> {
         unsafe {
-            TeamWrapper::new(GameEvent_Soccar_TA_Get_GameWinner(self.addr()))
+            TeamWrapper::try_new(GameEvent_Soccar_TA_Get_GameWinner(self.addr()))
         }
     }
-    fn get_match_winner(&self) -> TeamWrapper {
+    fn get_match_winner(&self) -> Option<TeamWrapper> {
         unsafe {
-            TeamWrapper::new(GameEvent_Soccar_TA_Get_MatchWinner(self.addr()))
+            TeamWrapper::try_new(GameEvent_Soccar_TA_Get_MatchWinner(self.addr()))
         }
     }
     fn get_replicated_scored_on_team(&self) -> u8 {
@@ -209,24 +212,24 @@ pub trait Server : TeamGameEvent {
             GameEvent_Soccar_TA_Get_ReplicatedServerPerformanceState(self.addr())
         }
     }
-    fn get_mvp(&self) -> PriWrapper {
+    fn get_mvp(&self) -> Option<PriWrapper> {
         unsafe {
-            PriWrapper::new(GameEvent_Soccar_TA_Get_MVP(self.addr()))
+            PriWrapper::try_new(GameEvent_Soccar_TA_Get_MVP(self.addr()))
         }
     }
-    fn get_fastest_goal_player(&self) -> PriWrapper {
+    fn get_fastest_goal_player(&self) -> Option<PriWrapper> {
         unsafe {
-            PriWrapper::new(GameEvent_Soccar_TA_Get_FastestGoalPlayer(self.addr()))
+            PriWrapper::try_new(GameEvent_Soccar_TA_Get_FastestGoalPlayer(self.addr()))
         }
     }
-    fn get_slowest_goal_player(&self) -> PriWrapper {
+    fn get_slowest_goal_player(&self) -> Option<PriWrapper> {
         unsafe {
-            PriWrapper::new(GameEvent_Soccar_TA_Get_SlowestGoalPlayer(self.addr()))
+            PriWrapper::try_new(GameEvent_Soccar_TA_Get_SlowestGoalPlayer(self.addr()))
         }
     }
-    fn get_furthest_goal_player(&self) -> PriWrapper {
+    fn get_furthest_goal_player(&self) -> Option<PriWrapper> {
         unsafe {
-            PriWrapper::new(GameEvent_Soccar_TA_Get_FurthestGoalPlayer(self.addr()))
+            PriWrapper::try_new(GameEvent_Soccar_TA_Get_FurthestGoalPlayer(self.addr()))
         }
     }
     fn get_fastest_goal_speed(&self) -> f32 {
@@ -269,9 +272,9 @@ pub trait Server : TeamGameEvent {
             GameEvent_Soccar_TA_Get_PodiumTime(self.addr())
         }
     }
-    fn get_pauser(&self) -> PlayerControllerWrapper {
+    fn get_pauser(&self) -> Option<PlayerControllerWrapper> {
         unsafe {
-            PlayerControllerWrapper::new(GameEvent_Soccar_TA_Get_Pauser(self.addr()))
+            PlayerControllerWrapper::try_new(GameEvent_Soccar_TA_Get_Pauser(self.addr()))
         }
     }
     fn check_start(&self) {
@@ -514,13 +517,13 @@ pub trait Server : TeamGameEvent {
             GameEvent_Soccar_TA_OnBallHasBeenHit(self.addr());
         }
     }
-    fn spawn_ball(&self, spawn_loc: Vector, b_wake: bool, b_spawn_cannon: bool, ball_arch: RLString) -> BallWrapper {
+    fn spawn_ball(&self, spawn_loc: Vector, b_wake: bool, b_spawn_cannon: bool, ball_arch: RLString) -> Option<BallWrapper> {
         unsafe {
             let mut spawn_loc = spawn_loc;
             let spawn_loc: *mut Vector = &mut spawn_loc as *mut Vector;
             let mut ball_arch = ball_arch;
             let ball_arch: *mut RLString = &mut ball_arch as *mut RLString;
-            BallWrapper::new(GameEvent_Soccar_TA_SpawnBall(self.addr(), spawn_loc, b_wake, b_spawn_cannon, ball_arch))
+            BallWrapper::try_new(GameEvent_Soccar_TA_SpawnBall(self.addr(), spawn_loc, b_wake, b_spawn_cannon, ball_arch))
         }
     }
     fn get_total_score(&self) -> i32 {
@@ -635,9 +638,9 @@ pub trait Server : TeamGameEvent {
             GameEvent_Soccar_TA_OnMyHalf(self.addr(), test_location, team_num)
         }
     }
-    fn get_winning_team(&self) -> TeamWrapper {
+    fn get_winning_team(&self) -> Option<TeamWrapper> {
         unsafe {
-            TeamWrapper::new(GameEvent_Soccar_TA_GetWinningTeam(self.addr()))
+            TeamWrapper::try_new(GameEvent_Soccar_TA_GetWinningTeam(self.addr()))
         }
     }
     fn on_ball_spawned(&self, new_ball: BallWrapper) {

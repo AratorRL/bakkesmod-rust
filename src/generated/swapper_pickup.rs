@@ -11,9 +11,9 @@ impl CarComponent for SwapperPickupWrapper {}
 impl Actor for SwapperPickupWrapper {}
 
 pub trait SwapperPickup : TargetedPickup {
-    fn get_other_car(&self) -> CarWrapper {
+    fn get_other_car(&self) -> Option<CarWrapper> {
         unsafe {
-            CarWrapper::new(SpecialPickup_Swapper_TA_Get_OtherCar(self.addr()))
+            CarWrapper::try_new(SpecialPickup_Swapper_TA_Get_OtherCar(self.addr()))
         }
     }
     fn pickup_end(&self) {

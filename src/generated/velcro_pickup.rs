@@ -58,9 +58,9 @@ pub trait VelcroPickup : RumblePickupComponent {
             SpecialPickup_BallVelcro_TA_Get_CheckLastTouchRate(self.addr())
         }
     }
-    fn get_welded_ball(&self) -> BallWrapper {
+    fn get_welded_ball(&self) -> Option<BallWrapper> {
         unsafe {
-            BallWrapper::new(SpecialPickup_BallVelcro_TA_Get_WeldedBall(self.addr()))
+            BallWrapper::try_new(SpecialPickup_BallVelcro_TA_Get_WeldedBall(self.addr()))
         }
     }
     fn get_old_ball_mass(&self) -> f32 {

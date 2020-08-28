@@ -37,14 +37,14 @@ pub trait RumblePickupComponent : CarComponent {
             SpecialPickup_TA_Get_ActivationDuration(self.addr())
         }
     }
-    fn get_pickup_fx_archetype(&self) -> FXActorWrapper {
+    fn get_pickup_fx_archetype(&self) -> Option<FXActorWrapper> {
         unsafe {
-            FXActorWrapper::new(SpecialPickup_TA_Get_PickupFXArchetype(self.addr()))
+            FXActorWrapper::try_new(SpecialPickup_TA_Get_PickupFXArchetype(self.addr()))
         }
     }
-    fn get_pickup_fx(&self) -> FXActorWrapper {
+    fn get_pickup_fx(&self) -> Option<FXActorWrapper> {
         unsafe {
-            FXActorWrapper::new(SpecialPickup_TA_Get_PickupFX(self.addr()))
+            FXActorWrapper::try_new(SpecialPickup_TA_Get_PickupFX(self.addr()))
         }
     }
     fn has_activated(&self) -> bool {
@@ -52,9 +52,9 @@ pub trait RumblePickupComponent : CarComponent {
             SpecialPickup_TA_HasActivated(self.addr())
         }
     }
-    fn get_client_target(&self) -> RBActorWrapper {
+    fn get_client_target(&self) -> Option<RBActorWrapper> {
         unsafe {
-            RBActorWrapper::new(SpecialPickup_TA_GetClientTarget(self.addr()))
+            RBActorWrapper::try_new(SpecialPickup_TA_GetClientTarget(self.addr()))
         }
     }
     fn on_vehicle_setup_complete(&self) {
@@ -77,9 +77,9 @@ pub trait RumblePickupComponent : CarComponent {
             SpecialPickup_TA_PickupStart(self.addr());
         }
     }
-    fn get_boost_component(&self) -> BoostWrapper {
+    fn get_boost_component(&self) -> Option<BoostWrapper> {
         unsafe {
-            BoostWrapper::new(SpecialPickup_TA_GetBoostComponent(self.addr()))
+            BoostWrapper::try_new(SpecialPickup_TA_GetBoostComponent(self.addr()))
         }
     }
     fn deactivate_pickup(&self) {

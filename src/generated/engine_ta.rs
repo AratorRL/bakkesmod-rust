@@ -105,9 +105,9 @@ pub trait EngineTA : Object {
 			EngineShare_TA_Get_DebugClientCorrectionCount(self.addr())
 		}
 	}
-	fn get_stat_graphs(&self) -> StatGraphSystemWrapper {
+	fn get_stat_graphs(&self) -> Option<StatGraphSystemWrapper> {
 		unsafe {
-			StatGraphSystemWrapper::new(EngineShare_TA_Get_StatGraphs(self.addr()))
+			StatGraphSystemWrapper::try_new(EngineShare_TA_Get_StatGraphs(self.addr()))
 		}
 	}
 	fn get_last_physics_delta_time_scale(&self) -> f32 {

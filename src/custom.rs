@@ -82,8 +82,8 @@ pub trait CustomWrappers : Object {
 
 
 
-    fn get_ball(&self) -> BallWrapper {
-        unsafe { BallWrapper::new(Server_GetBall(self.addr())) }
+    fn get_ball(&self) -> Option<BallWrapper> {
+        unsafe { BallWrapper::try_new(Server_GetBall(self.addr())) }
     }
 
     fn spawn_car(&self, car_body: i32, name: &str) {
@@ -98,10 +98,10 @@ pub trait CustomWrappers : Object {
         unsafe { Server_SpawnBot(self.addr(), car_body, c_name) }
     }
 
-    fn spawn_ball(&self, position: Vector, wake: bool, spawn_cannon: bool) -> BallWrapper {
+    fn spawn_ball(&self, position: Vector, wake: bool, spawn_cannon: bool) -> Option<BallWrapper> {
         let mut position = position;
         let position = &mut position as *mut Vector;
-        unsafe { BallWrapper::new(Server_SpawnBall(self.addr(), position, wake, spawn_cannon)) }
+        unsafe { BallWrapper::try_new(Server_SpawnBall(self.addr(), position, wake, spawn_cannon)) }
     }
 
     fn has_authority(&self) -> bool {
@@ -124,8 +124,8 @@ pub trait CustomWrappers : Object {
         unsafe { Server_GetSecondsElapsed(self.addr()) }
     }
 
-    fn get_game_car(&self) -> CarWrapper {
-        unsafe { CarWrapper::new(Server_GetGameCar(self.addr())) }
+    fn get_game_car(&self) -> Option<CarWrapper> {
+        unsafe { CarWrapper::try_new(Server_GetGameCar(self.addr())) }
     }
 
     fn is_ball_moving_towards_goal(&self, goal_no: i32, ball: BallWrapper) -> bool {

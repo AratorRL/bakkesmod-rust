@@ -11,9 +11,9 @@ impl CarComponent for BoostOverridePickupWrapper {}
 impl Actor for BoostOverridePickupWrapper {}
 
 pub trait BoostOverridePickup : TargetedPickup {
-	fn get_other_car(&self) -> CarWrapper {
+	fn get_other_car(&self) -> Option<CarWrapper> {
 		unsafe {
-			CarWrapper::new(SpecialPickup_BoostOverride_TA_Get_OtherCar(self.addr()))
+			CarWrapper::try_new(SpecialPickup_BoostOverride_TA_Get_OtherCar(self.addr()))
 		}
 	}
 	fn pickup_end(&self) {

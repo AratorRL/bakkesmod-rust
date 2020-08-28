@@ -285,9 +285,9 @@ pub trait Tutorial : Server {
             GameEvent_Tutorial_TA_SaveLocalPlayerStats(self.addr());
         }
     }
-    fn get_winning_team(&self) -> TeamWrapper {
+    fn get_winning_team(&self) -> Option<TeamWrapper> {
         unsafe {
-            TeamWrapper::new(GameEvent_Tutorial_TA_GetWinningTeam(self.addr()))
+            TeamWrapper::try_new(GameEvent_Tutorial_TA_GetWinningTeam(self.addr()))
         }
     }
     fn cleanup_round_actors(&self) {
@@ -404,14 +404,14 @@ pub trait Tutorial : Server {
             result
         }
     }
-    fn get_game_ball(&self) -> BallWrapper {
+    fn get_game_ball(&self) -> Option<BallWrapper> {
         unsafe {
-            BallWrapper::new(GameEvent_Tutorial_TA_GetGameBall(self.addr()))
+            BallWrapper::try_new(GameEvent_Tutorial_TA_GetGameBall(self.addr()))
         }
     }
-    fn get_game_pawn(&self) -> CarWrapper {
+    fn get_game_pawn(&self) -> Option<CarWrapper> {
         unsafe {
-            CarWrapper::new(GameEvent_Tutorial_TA_GetGamePawn(self.addr()))
+            CarWrapper::try_new(GameEvent_Tutorial_TA_GetGamePawn(self.addr()))
         }
     }
     fn reset_game_event(&self) {
@@ -460,13 +460,13 @@ pub trait Tutorial : Server {
             GameEvent_Tutorial_TA_SetCannonOrientation(self.addr(), new_location, new_rotation);
         }
     }
-    fn spawn_ball(&self, spawn_loc: Vector, b_wake: bool, b_spawn_cannon: bool, ball_arch: RLString) -> BallWrapper {
+    fn spawn_ball(&self, spawn_loc: Vector, b_wake: bool, b_spawn_cannon: bool, ball_arch: RLString) -> Option<BallWrapper> {
         unsafe {
             let mut spawn_loc = spawn_loc;
             let spawn_loc: *mut Vector = &mut spawn_loc as *mut Vector;
             let mut ball_arch = ball_arch;
             let ball_arch: *mut RLString = &mut ball_arch as *mut RLString;
-            BallWrapper::new(GameEvent_Tutorial_TA_SpawnBall(self.addr(), spawn_loc, b_wake, b_spawn_cannon, ball_arch))
+            BallWrapper::try_new(GameEvent_Tutorial_TA_SpawnBall(self.addr(), spawn_loc, b_wake, b_spawn_cannon, ball_arch))
         }
     }
     fn init_ball_effects(&self) {

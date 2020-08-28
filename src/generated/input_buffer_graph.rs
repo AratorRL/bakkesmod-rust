@@ -8,24 +8,24 @@ impl InputBufferGraph for InputBufferGraphWrapper {}
 impl StatGraph for InputBufferGraphWrapper {}
 
 pub trait InputBufferGraph : StatGraph {
-	fn get_buffer(&self) -> SampleHistoryWrapper {
+	fn get_buffer(&self) -> Option<SampleHistoryWrapper> {
 		unsafe {
-			SampleHistoryWrapper::new(InputBufferGraph_TA_Get_Buffer(self.addr()))
+			SampleHistoryWrapper::try_new(InputBufferGraph_TA_Get_Buffer(self.addr()))
 		}
 	}
-	fn get_buffer_target(&self) -> SampleHistoryWrapper {
+	fn get_buffer_target(&self) -> Option<SampleHistoryWrapper> {
 		unsafe {
-			SampleHistoryWrapper::new(InputBufferGraph_TA_Get_BufferTarget(self.addr()))
+			SampleHistoryWrapper::try_new(InputBufferGraph_TA_Get_BufferTarget(self.addr()))
 		}
 	}
-	fn get_over_under_frames(&self) -> SampleHistoryWrapper {
+	fn get_over_under_frames(&self) -> Option<SampleHistoryWrapper> {
 		unsafe {
-			SampleHistoryWrapper::new(InputBufferGraph_TA_Get_OverUnderFrames(self.addr()))
+			SampleHistoryWrapper::try_new(InputBufferGraph_TA_Get_OverUnderFrames(self.addr()))
 		}
 	}
-	fn get_physics_rate(&self) -> SampleHistoryWrapper {
+	fn get_physics_rate(&self) -> Option<SampleHistoryWrapper> {
 		unsafe {
-			SampleHistoryWrapper::new(InputBufferGraph_TA_Get_PhysicsRate(self.addr()))
+			SampleHistoryWrapper::try_new(InputBufferGraph_TA_Get_PhysicsRate(self.addr()))
 		}
 	}
 	fn get_max_physics_rate(&self) -> f32 {
@@ -38,11 +38,11 @@ pub trait InputBufferGraph : StatGraph {
 			InputBufferGraph_TA_Get_MinPhysicsRate(self.addr())
 		}
 	}
-	fn create_buffer_history(&self, title: RLString) -> SampleHistoryWrapper {
+	fn create_buffer_history(&self, title: RLString) -> Option<SampleHistoryWrapper> {
 		unsafe {
 			let mut title = title;
 			let title: *mut RLString = &mut title as *mut RLString;
-			SampleHistoryWrapper::new(InputBufferGraph_TA_CreateBufferHistory(self.addr(), title))
+			SampleHistoryWrapper::try_new(InputBufferGraph_TA_CreateBufferHistory(self.addr(), title))
 		}
 	}
 

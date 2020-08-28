@@ -8,17 +8,17 @@ impl PlayerController for PlayerControllerWrapper {}
 impl Actor for PlayerControllerWrapper {}
 
 pub trait PlayerController : Actor {
-	fn get_car(&self) -> CarWrapper {
-		unsafe {
-			CarWrapper::new(PlayerController_TA_Get_Car(self.addr()))
-		}
-	}
-	fn get_pri(&self) -> PriWrapper {
-		unsafe {
-			PriWrapper::new(PlayerController_TA_Get_PRI(self.addr()))
-		}
-	}
-	fn get_vehicle_input(&self) -> VehicleInputs {
+    fn get_car(&self) -> Option<CarWrapper> {
+        unsafe {
+            CarWrapper::try_new(PlayerController_TA_Get_Car(self.addr()))
+        }
+    }
+    fn get_pri(&self) -> Option<PriWrapper> {
+        unsafe {
+            PriWrapper::try_new(PlayerController_TA_Get_PRI(self.addr()))
+        }
+    }
+    fn get_vehicle_input(&self) -> VehicleInputs {
 		unsafe {
 			let mut result = VehicleInputs::new();
 			let result_ptr: *mut VehicleInputs = &mut result as *mut VehicleInputs;
@@ -84,19 +84,19 @@ pub trait PlayerController : Actor {
 			PlayerController_TA_Get_ChatFilter(self.addr())
 		}
 	}
-	fn get_follow_target(&self) -> PriWrapper {
+	fn get_follow_target(&self) -> Option<PriWrapper> {
 		unsafe {
-			PriWrapper::new(PlayerController_TA_Get_FollowTarget(self.addr()))
+			PriWrapper::try_new(PlayerController_TA_Get_FollowTarget(self.addr()))
 		}
 	}
-	fn get_spectator_camera_archetype(&self) -> BaseCameraWrapper {
+	fn get_spectator_camera_archetype(&self) -> Option<BaseCameraWrapper> {
 		unsafe {
-			BaseCameraWrapper::new(PlayerController_TA_Get_SpectatorCameraArchetype(self.addr()))
+			BaseCameraWrapper::try_new(PlayerController_TA_Get_SpectatorCameraArchetype(self.addr()))
 		}
 	}
-	fn get_editor_camera_archetype(&self) -> BaseCameraWrapper {
+	fn get_editor_camera_archetype(&self) -> Option<BaseCameraWrapper> {
 		unsafe {
-			BaseCameraWrapper::new(PlayerController_TA_Get_EditorCameraArchetype(self.addr()))
+			BaseCameraWrapper::try_new(PlayerController_TA_Get_EditorCameraArchetype(self.addr()))
 		}
 	}
 	fn get_move_actor_grab_offset(&self) -> Vector {
@@ -152,9 +152,9 @@ pub trait PlayerController : Actor {
 			PlayerController_TA_Get_CrosshairTraceDistance(self.addr())
 		}
 	}
-	fn get_traced_crosshair_actor(&self) -> ActorWrapper {
+	fn get_traced_crosshair_actor(&self) -> Option<ActorWrapper> {
 		unsafe {
-			ActorWrapper::new(PlayerController_TA_Get_TracedCrosshairActor(self.addr()))
+			ActorWrapper::try_new(PlayerController_TA_Get_TracedCrosshairActor(self.addr()))
 		}
 	}
 	fn get_rotate_actor_camera_location_offset(&self) -> Vector {
@@ -259,9 +259,9 @@ pub trait PlayerController : Actor {
 			result
 		}
 	}
-	fn get_pending_view_pri(&self) -> PriWrapper {
+	fn get_pending_view_pri(&self) -> Option<PriWrapper> {
 		unsafe {
-			PriWrapper::new(PlayerController_TA_Get_PendingViewPRI(self.addr()))
+			PriWrapper::try_new(PlayerController_TA_Get_PendingViewPRI(self.addr()))
 		}
 	}
 	fn get_last_input_pitch_up(&self) -> f32 {
@@ -299,9 +299,9 @@ pub trait PlayerController : Actor {
 			PlayerController_TA_Get_MouseInputMax(self.addr())
 		}
 	}
-	fn get_engine_share(&self) -> EngineTAWrapper {
+	fn get_engine_share(&self) -> Option<EngineTAWrapper> {
 		unsafe {
-			EngineTAWrapper::new(PlayerController_TA_Get_EngineShare(self.addr()))
+			EngineTAWrapper::try_new(PlayerController_TA_Get_EngineShare(self.addr()))
 		}
 	}
 	fn handle_car_set(&self, in_pri: PriWrapper) {
@@ -695,9 +695,9 @@ pub trait PlayerController : Actor {
 			PlayerController_TA_HandleGameDataSelected(self.addr(), playlist_id, mutator_index);
 		}
 	}
-	fn get_game_event(&self) -> GameEventWrapper {
+	fn get_game_event(&self) -> Option<GameEventWrapper> {
 		unsafe {
-			GameEventWrapper::new(PlayerController_TA_GetGameEvent(self.addr()))
+			GameEventWrapper::try_new(PlayerController_TA_GetGameEvent(self.addr()))
 		}
 	}
 	fn client_arbitrated_match_ended(&self) {
@@ -843,9 +843,9 @@ pub trait PlayerController : Actor {
 			PlayerController_TA_IgnoreMoveInput(self.addr(), b_new_move_input);
 		}
 	}
-	fn get_primary_player_controller(&self) -> PlayerControllerWrapper {
+	fn get_primary_player_controller(&self) -> Option<PlayerControllerWrapper> {
 		unsafe {
-			PlayerControllerWrapper::new(PlayerController_TA_GetPrimaryPlayerController(self.addr()))
+			PlayerControllerWrapper::try_new(PlayerController_TA_GetPrimaryPlayerController(self.addr()))
 		}
 	}
 	fn handle_add_boost_component(&self, boost: BoostWrapper) {

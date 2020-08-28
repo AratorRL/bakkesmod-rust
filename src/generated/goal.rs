@@ -7,9 +7,9 @@ impl_object!(GoalWrapper);
 impl Goal for GoalWrapper {}
 
 pub trait Goal : Object {
-	fn get_goal_orientation(&self) -> ActorWrapper {
+	fn get_goal_orientation(&self) -> Option<ActorWrapper> {
 		unsafe {
-			ActorWrapper::new(Goal_TA_Get_GoalOrientation(self.addr()))
+			ActorWrapper::try_new(Goal_TA_Get_GoalOrientation(self.addr()))
 		}
 	}
 	fn get_override_goal_indicator_orientations(&self) -> RLArray<ActorWrapper> {
@@ -25,9 +25,9 @@ pub trait Goal : Object {
 			Goal_TA_Get_TeamNum(self.addr())
 		}
 	}
-	fn get_score_fx(&self) -> FXActorWrapper {
+	fn get_score_fx(&self) -> Option<FXActorWrapper> {
 		unsafe {
-			FXActorWrapper::new(Goal_TA_Get_ScoreFX(self.addr()))
+			FXActorWrapper::try_new(Goal_TA_Get_ScoreFX(self.addr()))
 		}
 	}
 	fn get_goal_indicator_archetype(&self) -> RLString {
@@ -53,9 +53,9 @@ pub trait Goal : Object {
 			Goal_TA_Get_bShowFocusExtent(self.addr())
 		}
 	}
-	fn get_goal_direction(&self) -> ActorWrapper {
+	fn get_goal_direction(&self) -> Option<ActorWrapper> {
 		unsafe {
-			ActorWrapper::new(Goal_TA_Get_GoalDirection(self.addr()))
+			ActorWrapper::try_new(Goal_TA_Get_GoalDirection(self.addr()))
 		}
 	}
 	fn get_points_to_award(&self) -> i32 {

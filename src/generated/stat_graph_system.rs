@@ -17,19 +17,19 @@ pub trait StatGraphSystem : Object {
             StatGraphSystem_TA_Get_GraphLevel(self.addr())
         }
     }
-    fn get_perf_stat_graph(&self) -> PerfStatGraphWrapper {
+    fn get_perf_stat_graph(&self) -> Option<PerfStatGraphWrapper> {
         unsafe {
-            PerfStatGraphWrapper::new(StatGraphSystem_TA_Get_PerfStatGraph(self.addr()))
+            PerfStatGraphWrapper::try_new(StatGraphSystem_TA_Get_PerfStatGraph(self.addr()))
         }
     }
-    fn get_net_stat_graph(&self) -> NetStatGraphWrapper {
+    fn get_net_stat_graph(&self) -> Option<NetStatGraphWrapper> {
         unsafe {
-            NetStatGraphWrapper::new(StatGraphSystem_TA_Get_NetStatGraph(self.addr()))
+            NetStatGraphWrapper::try_new(StatGraphSystem_TA_Get_NetStatGraph(self.addr()))
         }
     }
-    fn get_input_buffer_graph(&self) -> InputBufferGraphWrapper {
+    fn get_input_buffer_graph(&self) -> Option<InputBufferGraphWrapper> {
         unsafe {
-            InputBufferGraphWrapper::new(StatGraphSystem_TA_Get_InputBufferGraph(self.addr()))
+            InputBufferGraphWrapper::try_new(StatGraphSystem_TA_Get_InputBufferGraph(self.addr()))
         }
     }
     fn get_stat_graphs(&self) -> RLArray<StatGraphWrapper> {

@@ -54,9 +54,9 @@ pub trait PlayerReplicationInfo : Actor {
 			PlayerReplicationInfo_Get_PlayerID(self.addr())
 		}
 	}
-	fn get_team(&self) -> TeamInfoWrapper {
+	fn get_team(&self) -> Option<TeamInfoWrapper> {
 		unsafe {
-			TeamInfoWrapper::new(PlayerReplicationInfo_Get_Team(self.addr()))
+			TeamInfoWrapper::try_new(PlayerReplicationInfo_Get_Team(self.addr()))
 		}
 	}
 	fn get_b_admin(&self) -> bool {
@@ -208,9 +208,9 @@ pub trait PlayerReplicationInfo : Actor {
 			PlayerReplicationInfo_OverrideWith(self.addr(), pri.addr());
 		}
 	}
-	fn duplicate(&self) -> PlayerReplicationInfoWrapper {
+	fn duplicate(&self) -> Option<PlayerReplicationInfoWrapper> {
 		unsafe {
-			PlayerReplicationInfoWrapper::new(PlayerReplicationInfo_Duplicate(self.addr()))
+			PlayerReplicationInfoWrapper::try_new(PlayerReplicationInfo_Duplicate(self.addr()))
 		}
 	}
 	fn set_waiting_player(&self, b: bool) {

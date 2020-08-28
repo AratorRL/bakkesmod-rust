@@ -43,9 +43,9 @@ pub trait GravityPickup : RumblePickupComponent {
 			SpecialPickup_BallGravity_TA_Get_LastRecordedBallHitTime(self.addr())
 		}
 	}
-	fn get_prev_ball(&self) -> BallWrapper {
+	fn get_prev_ball(&self) -> Option<BallWrapper> {
 		unsafe {
-			BallWrapper::new(SpecialPickup_BallGravity_TA_Get_PrevBall(self.addr()))
+			BallWrapper::try_new(SpecialPickup_BallGravity_TA_Get_PrevBall(self.addr()))
 		}
 	}
 	fn update_visual(&self) {

@@ -11,14 +11,14 @@ impl CarComponent for BallFreezePickupWrapper {}
 impl Actor for BallFreezePickupWrapper {}
 
 pub trait BallFreezePickup : TargetedPickup {
-	fn get_freeze_break_fx_archetype(&self) -> FXActorWrapper {
+	fn get_freeze_break_fx_archetype(&self) -> Option<FXActorWrapper> {
 		unsafe {
-			FXActorWrapper::new(SpecialPickup_BallFreeze_TA_Get_FreezeBreakFXArchetype(self.addr()))
+			FXActorWrapper::try_new(SpecialPickup_BallFreeze_TA_Get_FreezeBreakFXArchetype(self.addr()))
 		}
 	}
-	fn get_freeze_fx_archetype(&self) -> FXActorWrapper {
+	fn get_freeze_fx_archetype(&self) -> Option<FXActorWrapper> {
 		unsafe {
-			FXActorWrapper::new(SpecialPickup_BallFreeze_TA_Get_FreezeFXArchetype(self.addr()))
+			FXActorWrapper::try_new(SpecialPickup_BallFreeze_TA_Get_FreezeFXArchetype(self.addr()))
 		}
 	}
 	fn get_b_maintain_momentum(&self) -> bool {
@@ -41,9 +41,9 @@ pub trait BallFreezePickup : TargetedPickup {
 			SpecialPickup_BallFreeze_TA_Get_StopMomentumPercentage(self.addr())
 		}
 	}
-	fn get_ball(&self) -> BallWrapper {
+	fn get_ball(&self) -> Option<BallWrapper> {
 		unsafe {
-			BallWrapper::new(SpecialPickup_BallFreeze_TA_Get_Ball(self.addr()))
+			BallWrapper::try_new(SpecialPickup_BallFreeze_TA_Get_Ball(self.addr()))
 		}
 	}
 	fn get_orig_linear_velocity(&self) -> Vector {
@@ -72,9 +72,9 @@ pub trait BallFreezePickup : TargetedPickup {
 			SpecialPickup_BallFreeze_TA_Get_RepOrigSpeed(self.addr())
 		}
 	}
-	fn get_freeze_fx(&self) -> FXActorWrapper {
+	fn get_freeze_fx(&self) -> Option<FXActorWrapper> {
 		unsafe {
-			FXActorWrapper::new(SpecialPickup_BallFreeze_TA_Get_FreezeFX(self.addr()))
+			FXActorWrapper::try_new(SpecialPickup_BallFreeze_TA_Get_FreezeFX(self.addr()))
 		}
 	}
 	fn pickup_end(&self) {

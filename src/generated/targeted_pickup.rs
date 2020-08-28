@@ -50,19 +50,19 @@ pub trait TargetedPickup : RumblePickupComponent {
             SpecialPickup_Targeted_TA_Get_DirectionalTargetingAccuracy(self.addr())
         }
     }
-    fn get_client_target(&self) -> RBActorWrapper {
+    fn get_client_target(&self) -> Option<RBActorWrapper> {
         unsafe {
-            RBActorWrapper::new(SpecialPickup_Targeted_TA_Get_ClientTarget(self.addr()))
+            RBActorWrapper::try_new(SpecialPickup_Targeted_TA_Get_ClientTarget(self.addr()))
         }
     }
-    fn get_targeted(&self) -> RBActorWrapper {
+    fn get_targeted(&self) -> Option<RBActorWrapper> {
         unsafe {
-            RBActorWrapper::new(SpecialPickup_Targeted_TA_Get_Targeted(self.addr()))
+            RBActorWrapper::try_new(SpecialPickup_Targeted_TA_Get_Targeted(self.addr()))
         }
     }
-    fn get_client_target2(&self) -> RBActorWrapper {
+    fn get_client_target2(&self) -> Option<RBActorWrapper> {
         unsafe {
-            RBActorWrapper::new(SpecialPickup_Targeted_TA_GetClientTarget2(self.addr()))
+            RBActorWrapper::try_new(SpecialPickup_Targeted_TA_GetClientTarget2(self.addr()))
         }
     }
     fn target_changed(&self) {
@@ -90,9 +90,9 @@ pub trait TargetedPickup : RumblePickupComponent {
             SpecialPickup_Targeted_TA_ValidateTarget(self.addr(), in_target.addr())
         }
     }
-    fn get_target(&self) -> RBActorWrapper {
+    fn get_target(&self) -> Option<RBActorWrapper> {
         unsafe {
-            RBActorWrapper::new(SpecialPickup_Targeted_TA_GetTarget(self.addr()))
+            RBActorWrapper::try_new(SpecialPickup_Targeted_TA_GetTarget(self.addr()))
         }
     }
 
