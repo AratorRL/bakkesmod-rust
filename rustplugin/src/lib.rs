@@ -145,20 +145,23 @@ pub fn on_load() {
             }
         };
         
-        // let balls = game.get_game_balls();
-        // let ball = {
-        //     let balls = game.get_game_balls();
-        //     if balls.len() < 1 {
-        //         log_console!("you don't have any balls!");
-        //         return;
-        //     }
-        //     balls.get(0)
-        // };
-
         match game.get_ball() {
             Some(ball) => log_console!("{}", ball.get_location()),
             None => log_console!("ball is NULL")
         };
+
+    }));
+
+    bakkesmod::register_notifier("rust_spawn_car", Box::new(move |_: Vec<String>| {
+        let game = match bakkesmod::get_game_event_as_server() {
+            Some(g) => g,
+            None => {
+                log_console!("game is null!");
+                return;
+            }
+        };
+        
+        game.spawn_bot(22, "Bors");
 
     }));
 

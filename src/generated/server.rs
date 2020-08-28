@@ -1,6 +1,8 @@
+use std::ffi::{CString, CStr};
+use std::os::raw::c_char;
+
 use crate::wrappers::*;
 use crate::generated::*;
-use crate::custom::*;
 
 pub struct ServerWrapper(pub usize);
 impl_object!(ServerWrapper);
@@ -10,9 +12,105 @@ impl TeamGameEvent for ServerWrapper {}
 impl GameEvent for ServerWrapper {}
 impl Actor for ServerWrapper {}
 
-impl CustomWrappers for ServerWrapper {}
-
 pub trait Server : TeamGameEvent {
+    fn get_ball(&self) -> Option<BallWrapper> {
+        unsafe { BallWrapper::try_new(Server_GetBall(self.addr())) }
+    }
+
+    fn spawn_car(&self, car_body: i32, name: &str) {
+        let c_name = CString::new(name).unwrap();
+        let c_name: *const c_char = c_name.as_ptr();
+        unsafe { Server_SpawnCar(self.addr(), car_body, c_name) }
+    }
+
+    fn spawn_bot(&self, car_body: i32, name: &str) {
+        let c_name = CString::new(name).unwrap();
+        let c_name: *const c_char = c_name.as_ptr();
+        unsafe { Server_SpawnBot(self.addr(), car_body, c_name) }
+    }
+
+    fn spawn_ball(&self, position: Vector, wake: bool, spawn_cannon: bool) -> Option<BallWrapper> {
+        let mut position = position;
+        let position = &mut position as *mut Vector;
+        unsafe { BallWrapper::try_new(Server_SpawnBall(self.addr(), position, wake, spawn_cannon)) }
+    }
+
+    fn has_authority(&self) -> bool {
+        unsafe { Server_HasAuthority(self.addr()) }
+    }
+
+    fn set_game_speed(&self, game_speed: f32) {
+        unsafe { Server_SetGameSpeed(self.addr(), game_speed); }
+    }
+
+    fn get_game_speed(&self) -> f32 {
+        unsafe { Server_GetGameSpeed(self.addr()) }
+    }
+
+    fn set_seconds_elapsed(&self, seconds_elapsed: f32) {
+        unsafe { Server_SetSecondsElapsed(self.addr(), seconds_elapsed); }
+    }
+
+    fn get_seconds_elapsed(&self) -> f32 {
+        unsafe { Server_GetSecondsElapsed(self.addr()) }
+    }
+
+    fn get_game_car(&self) -> Option<CarWrapper> {
+        unsafe { CarWrapper::try_new(Server_GetGameCar(self.addr())) }
+    }
+
+    fn is_ball_moving_towards_goal(&self, goal_no: i32, ball: BallWrapper) -> bool {
+        unsafe { Server_IsBallMovingTowardsGoal(self.addr(), goal_no, ball.addr()) }
+    }
+
+    fn is_in_goal(&self, vec: Vector) -> bool {
+        let mut vec = vec;
+        let vec = &mut vec as *mut Vector;
+        unsafe { Server_IsInGoal(self.addr(), vec) }
+    }
+
+    fn disable_goal_reset(&self) {
+        unsafe { Server_DisableGoalReset(self.addr()) }
+    }
+
+    fn enable_goal_reset(&self) {
+        unsafe { Server_EnableGoalReset(self.addr()) }
+    }
+
+    fn generate_shot(&self, start_pos: Vector, destination: Vector, speed: f32) -> Vector {
+        let mut start_pos = start_pos;
+        let start_pos = &mut start_pos as *mut Vector;
+        let mut destination = destination;
+        let destination = &mut destination as *mut Vector;
+        let mut result = Vector::new();
+        let result_ptr = &mut result as *mut Vector;
+        unsafe { Server_GenerateShot(self.addr(), start_pos, destination, speed, result_ptr) }
+        result
+    }
+
+    fn generate_goal_aim_location(&self, goal_number: i32, current_ball_location: Vector) -> Vector {
+        let mut current_ball_location = current_ball_location;
+        let current_ball_location = &mut current_ball_location as *mut Vector;
+        let mut result = Vector::new();
+        let result_ptr = &mut result as *mut Vector;
+        unsafe { Server_GenerateGoalAimLocation(self.addr(), goal_number, current_ball_location, result_ptr)}
+        result
+    }
+
+    fn get_goal_extent(&self, goal_number: i32) -> Vector {
+        let mut result = Vector::new();
+        let result_ptr = &mut result as *mut Vector;
+        unsafe { Server_GetGoalExtent(self.addr(), goal_number, result_ptr)}
+        result
+    }
+
+    fn get_goal_location(&self, goal_number: i32) -> Vector {
+        let mut result = Vector::new();
+        let result_ptr = &mut result as *mut Vector;
+        unsafe { Server_GetGoalLocation(self.addr(), goal_number, result_ptr)}
+        result
+    }
+
     fn get_test_car_archetype(&self) -> Option<CarWrapper> {
         unsafe {
             CarWrapper::try_new(GameEvent_Soccar_TA_Get_TestCarArchetype(self.addr()))
@@ -517,15 +615,7 @@ pub trait Server : TeamGameEvent {
             GameEvent_Soccar_TA_OnBallHasBeenHit(self.addr());
         }
     }
-    fn spawn_ball(&self, spawn_loc: Vector, b_wake: bool, b_spawn_cannon: bool, ball_arch: RLString) -> Option<BallWrapper> {
-        unsafe {
-            let mut spawn_loc = spawn_loc;
-            let spawn_loc: *mut Vector = &mut spawn_loc as *mut Vector;
-            let mut ball_arch = ball_arch;
-            let ball_arch: *mut RLString = &mut ball_arch as *mut RLString;
-            BallWrapper::try_new(GameEvent_Soccar_TA_SpawnBall(self.addr(), spawn_loc, b_wake, b_spawn_cannon, ball_arch))
-        }
-    }
+
     fn get_total_score(&self) -> i32 {
         unsafe {
             GameEvent_Soccar_TA_GetTotalScore(self.addr())
@@ -799,6 +889,25 @@ pub trait Server : TeamGameEvent {
 }
 
 extern "C" {
+    fn Server_GetBall(obj: usize) -> usize;
+    fn Server_SpawnCar(obj: usize, carBody: i32, name: *const c_char);
+    fn Server_SpawnBot(obj: usize, carBody: i32, name: *const c_char);
+    fn Server_SpawnBall(obj: usize, position: *mut Vector, wake: bool, spawnCannon: bool) -> usize;
+    fn Server_HasAuthority(obj: usize) -> bool;
+    fn Server_SetGameSpeed(obj: usize, GameSpeed: f32);
+    fn Server_GetGameSpeed(obj: usize) -> f32;
+    fn Server_SetSecondsElapsed(obj: usize, SecondsElapsed: f32);
+    fn Server_GetSecondsElapsed(obj: usize) -> f32;
+    fn Server_GetGameCar(obj: usize) -> usize;
+    fn Server_IsBallMovingTowardsGoal(obj: usize, goalNo: i32, bw: usize) -> bool;
+    fn Server_IsInGoal(obj: usize, vec: *mut Vector) -> bool;
+    fn Server_DisableGoalReset(obj: usize);
+    fn Server_EnableGoalReset(obj: usize);
+    fn Server_GenerateShot(obj: usize, startPos: *mut Vector, destination: *mut Vector, speed: f32, result: *mut Vector);
+    fn Server_GenerateGoalAimLocation(obj: usize, goalNumber: i32, currentBallLocation: *mut Vector, result: *mut Vector);
+    fn Server_GetGoalExtent(obj: usize, goalNumber: i32, result: *mut Vector);
+    fn Server_GetGoalLocation(obj: usize, goalNumber: i32, result: *mut Vector);
+
     fn GameEvent_Soccar_TA_Get_TestCarArchetype(obj: usize) -> usize;
     fn ServerWrapper_SetTestCarArchetype(obj: usize, new_val: usize);
     fn GameEvent_Soccar_TA_Get_BallArchetype(obj: usize) -> usize;

@@ -1,6 +1,5 @@
 use crate::wrappers::*;
 use crate::generated::*;
-use crate::custom::*;
 
 pub struct BallWrapper(pub usize);
 impl_object!(BallWrapper);
@@ -8,8 +7,6 @@ impl_object!(BallWrapper);
 impl Ball for BallWrapper {}
 impl RBActor for BallWrapper {}
 impl Actor for BallWrapper {}
-
-impl CustomWrappers for BallWrapper {}
 
 pub trait Ball : RBActor {
     fn get_end_of_game_fx_archetype(&self) -> Option<FXActorWrapper> {

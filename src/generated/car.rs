@@ -1,6 +1,5 @@
 use crate::wrappers::*;
 use crate::generated::*;
-use crate::custom::*;
 
 pub struct CarWrapper(pub usize);
 impl_object!(CarWrapper);
@@ -10,9 +9,11 @@ impl Vehicle for CarWrapper {}
 impl RBActor for CarWrapper {}
 impl Actor for CarWrapper {}
 
-impl CustomWrappers for CarWrapper {}
-
 pub trait Car : Vehicle {
+    fn demolish(&self) {
+        unsafe { Car_Demolish(self.addr()); }
+    }
+
     fn get_default_car_components(&self) -> RLArray<CarComponentWrapper> {
         unsafe {
             let mut result = RLArrayRaw::new();
@@ -362,6 +363,8 @@ pub trait Car : Vehicle {
 }
 
 extern "C" {
+    fn Car_Demolish(p_car: usize);
+
     fn Car_TA_Get_DefaultCarComponents(obj: usize, result: *mut RLArrayRaw);
     fn Car_TA_Get_FlipComponent(obj: usize) -> usize;
     fn Car_TA_Get_DemolishTarget(obj: usize) -> u8;
@@ -447,5 +450,4 @@ extern "C" {
     fn Car_TA_HandleGameEventChanged(obj: usize, MyPRI: usize);
     fn Car_TA_OnPRIChanged(obj: usize);
     fn Car_TA_OnControllerChanged(obj: usize);
-
 }
