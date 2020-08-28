@@ -10,13 +10,13 @@ edition = "2018"
 lazy_static = "1.4.0"
 log = "0.4"
 simplelog = "^0.7.4"
-bakkesmod-macros = { path = "bakkesmod-macros"}
+bakkesmod-macros = { path = "crates/bakkesmod-macros"}
 
 [lib]
 name = "bakkesmod"
 
 [workspace]
 members = [
-    "bakkesmod-macros",
-    "rustplugin"
+    "crates/bakkesmod-macros",
+    "examples/rustplugin"
 ]

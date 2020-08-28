@@ -11,7 +11,7 @@ use std::cell::RefCell;
 use bakkesmod::*;
 use bakkesmod::{vec2, vec3};
 use bakkesmod::{self, log_console, plugin_init};
-use bakkesmod::{Canvas, CVar, Vector, CarWrapper};
+use bakkesmod::wrappers::*;
 
 #[plugin_init]
 pub fn on_load() {
