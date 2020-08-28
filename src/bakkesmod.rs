@@ -1,20 +1,18 @@
-#![allow(unused)]
-
-use std::collections::HashMap;
-use std::rc::Rc;
-use std::cell::RefCell;
-use std::sync::atomic::AtomicBool;
 use std::sync::Mutex;
 
 use std::ffi::{CString, CStr};
 use std::os::raw::c_char;
 
-use crate::CarWrapper;
-use crate::Car;
-use crate::*;
-use super::wrappers::Object;
-use super::wrappers::Canvas;
-use super::wrappers::CVar;
+use crate::wrappers::{
+    Object,
+    Canvas,
+    CVar,
+    CarWrapper,
+    PlayerControllerWrapper,
+    EngineTAWrapper,
+    CameraWrapper,
+    ServerWrapper,
+};
 
 trait BakkesMod {
     fn id(&self) -> u64;
@@ -43,7 +41,6 @@ pub fn bakkesmod_init(id: u64) {
 }
 
 pub fn bakkesmod_exit() {
-    info!("exiting plugin");
     bakkesmod().drop_callbacks();
 }
 
@@ -62,7 +59,6 @@ type HookWithCallerCallback<T> = dyn FnMut(Box<T>);
 type HookWithCallerCallbackInternal = dyn FnMut(usize, usize);
 type DrawableCallback = dyn FnMut(Canvas);
 type TimeoutCallback = dyn FnMut();
-type ExecuteCallback = dyn FnMut();
 
 
 #[macro_export]
@@ -90,24 +86,21 @@ pub fn register_notifier(name: &str, callback: Box<NotifierCallback>) {
 }
 
 extern "C" fn notifier_callback(addr: usize, params: *const *const c_char, len: u32) {
-    info!("callback called!");
-    info!("user data: {:x?}", addr);
-
-    if len <= 0 { info!("callback called but len is <= 0 !"); return; }
+    if len <= 0 { log_console!("callback called but len is <= 0 !"); return; }
 
     let params_ptr_ptr = params as *const *const c_char;
-    if params_ptr_ptr.is_null() { info!("ptr to params ptr is null!"); return; }
+    if params_ptr_ptr.is_null() { log_console!("ptr to params ptr is null!"); return; }
 
     let mut rust_params: Vec<String> = Vec::new();
 
     for i in 0..len {
         let params_ptr = unsafe { *(params_ptr_ptr.offset(i as isize)) as *const c_char };
-        if params_ptr.is_null() { info!("params ptr is null!"); return; }
+        if params_ptr.is_null() { log_console!("params ptr is null!"); return; }
 
         let params_c_str = unsafe { CStr::from_ptr(params_ptr) };
         match params_c_str.to_str() {
             Ok(s) => rust_params.push(String::from(s)),
-            Err(_) => { info!("params null"); return; }
+            Err(_) => { log_console!("params null"); return; }
         };
     }
 
@@ -156,19 +149,12 @@ pub fn add_on_value_changed(cvar: &CVar, callback: Box<OnValueChangedCallback>) 
     unsafe { CVar_AddOnValueChanged(cvar.addr(), id, cb_addr, c_callback); }
 }
 
-extern "C" fn on_value_changed_callback(addr: usize, old: *const c_char, cvar: usize) {
+extern "C" fn on_value_changed_callback(addr: usize, _old: *const c_char, cvar: usize) {
     let mut closure = unsafe { Box::from_raw(addr as *mut Box<OnValueChangedCallback>) };
 
     // TODO: use old string value
     closure(String::new(), CVar::new(cvar));
     let _ = Box::into_raw(closure);
-}
-
-macro_rules! cstring {
-    ($e: expr) => ({
-        let c_string = CString::new($e).unwrap();
-        c_string.as_ptr() as *const c_char
-    })
 }
 
 pub fn hook_event(name: &str, callback: Box<HookCallback>) {
@@ -212,7 +198,7 @@ pub fn unhook_event(name: &str) {
 }
 
 pub fn hook_event_with_caller<T: Object + 'static>(name: &str, mut callback: Box<HookWithCallerCallback<T>>) {
-    let wrapper_callback = Box::new(move |caller: usize, params: usize| {
+    let wrapper_callback = Box::new(move |caller: usize, _params: usize| {
         let obj_wrapper = T::new(caller);
         callback(Box::new(obj_wrapper));
     });
@@ -221,7 +207,7 @@ pub fn hook_event_with_caller<T: Object + 'static>(name: &str, mut callback: Box
 }
 
 pub fn hook_event_with_caller_post<T: Object + 'static>(name: &str, mut callback: Box<HookWithCallerCallback<T>>) {
-    let wrapper_callback = Box::new(move |caller: usize, params: usize| {
+    let wrapper_callback = Box::new(move |caller: usize, _params: usize| {
         let obj_wrapper = T::new(caller);
         callback(Box::new(obj_wrapper));
     });
@@ -287,14 +273,17 @@ pub fn set_timeout(callback: Box<TimeoutCallback>, time: f32) {
     unsafe { SetTimeout(id, cb_addr, c_callback, time); }
 }
 
-extern "C" fn timeout_callback(addr: usize, canvas: usize) {
+pub fn execute(callback: Box<TimeoutCallback>) {
+    set_timeout(callback, 0.0);
+}
+
+extern "C" fn timeout_callback(addr: usize) {
     let mut closure = unsafe { Box::from_raw(addr as *mut Box<TimeoutCallback>) };
     closure();
     let _ = Box::into_raw(closure);
 }
 
 pub fn log(text: &str) {
-    info!("trying to log \"{}\"", text);
     let id = bakkesmod().id();
     let c_text = CString::new(text).unwrap();
     let c_text: *const c_char = c_text.as_ptr();
@@ -335,7 +324,6 @@ pub fn get_game_event_as_server() -> Option<ServerWrapper> {
 }
 
 pub fn get_local_car() -> Option<CarWrapper> {
-    info!("calling get_local_car()");
     unsafe { CarWrapper::try_new(GetLocalCar()) }
 }
 
@@ -356,12 +344,12 @@ struct Dummy;
 
 impl BakkesMod for Dummy {
     fn id(&self) -> u64 { 0 }
-    fn add_notifier_callback(&self, addr: usize) {}
-    fn add_on_value_changed_callback(&self, addr: usize) {}
-    fn add_hook_callback(&self, addr: usize) {}
-    fn add_hook_caller_callback(&self, addr: usize) {}
-    fn add_drawable_callback(&self, addr: usize) {}
-    fn add_timeout_callback(&self, addr: usize) {}
+    fn add_notifier_callback(&self, _: usize) {}
+    fn add_on_value_changed_callback(&self, _: usize) {}
+    fn add_hook_callback(&self, _: usize) {}
+    fn add_hook_caller_callback(&self, _: usize) {}
+    fn add_drawable_callback(&self, _: usize) {}
+    fn add_timeout_callback(&self, _: usize) {}
     fn drop_callbacks(&self) {}
 }
 
@@ -411,38 +399,39 @@ impl BakkesMod for BakkesModWrapper {
     }
 
     fn drop_callbacks(&self) {
-        let mut notifiers = self.notifier_callbacks.lock().unwrap();
+        let notifiers = self.notifier_callbacks.lock().unwrap();
         for addr in notifiers.iter() {
             let _ = unsafe { Box::from_raw(*addr as *mut Box<NotifierCallback>) };
         }
 
-        let mut on_value_changed = self.on_value_changed_callbacks.lock().unwrap();
+        let on_value_changed = self.on_value_changed_callbacks.lock().unwrap();
         for addr in on_value_changed.iter() {
             let _ = unsafe { Box::from_raw(*addr as *mut Box<OnValueChangedCallback>) };
         }
 
-        let mut hooks = self.hook_callbacks.lock().unwrap();
+        let hooks = self.hook_callbacks.lock().unwrap();
         for addr in hooks.iter() {
             let _ = unsafe { Box::from_raw(*addr as *mut Box<HookCallback>) };
         }
 
-        let mut hooks_caller = self.hook_caller_callbacks.lock().unwrap();
+        let hooks_caller = self.hook_caller_callbacks.lock().unwrap();
         for addr in hooks_caller.iter() {
             let _ = unsafe { Box::from_raw(*addr as *mut Box<HookWithCallerCallbackInternal>) };
         }
 
-        let mut drawables = self.drawable_callbacks.lock().unwrap();
+        let drawables = self.drawable_callbacks.lock().unwrap();
         for addr in drawables.iter() {
             let _ = unsafe { Box::from_raw(*addr as *mut Box<DrawableCallback>) };
         }
 
-        let mut timeouts = self.timeout_callbacks.lock().unwrap();
+        let timeouts = self.timeout_callbacks.lock().unwrap();
         for addr in timeouts.iter() {
             let _ = unsafe { Box::from_raw(*addr as *mut Box<TimeoutCallback>) };
         }
     }
 }
 
+#[allow(unused)]
 extern "C" {
     fn LogConsole(id: u64, text: *const c_char);
     fn RegisterNotifier(id: u64, user_data: usize, cvar: *const c_char, callback: usize, description: *const c_char, permissions: u8);
