@@ -1,0 +1,13 @@
+[package]
+name = "tinyplugin"
+version = "0.1.0"
+authors = ["Arator <arator.rl@outlook.com>"]
+edition = "2018"
+
+[dependencies]
+bakkesmod = { path = "../../" }
+bakkesmod-macros = { path = "../../crates/bakkesmod-macros" }
+
+[lib]
+name = "tinyplugin"
+crate_type = ["cdylib"]

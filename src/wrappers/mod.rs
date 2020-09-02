@@ -8,6 +8,8 @@ use std::marker::{PhantomData, Sized};
 use std::ffi::{CString, CStr};
 use std::os::raw::c_char;
 
+use crate::log_console;
+
 #[macro_use] mod macros;
 
 mod generated;

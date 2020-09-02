@@ -3,6 +3,8 @@ use std::sync::Mutex;
 use std::ffi::{CString, CStr};
 use std::os::raw::c_char;
 
+use crate::log_console;
+
 use crate::wrappers::{
     Object,
     Canvas,
@@ -60,13 +62,6 @@ type HookWithCallerCallbackInternal = dyn FnMut(usize, usize);
 type DrawableCallback = dyn FnMut(Canvas);
 type TimeoutCallback = dyn FnMut();
 
-
-#[macro_export]
-macro_rules! log_console {
-    ($($arg:tt)*) => ({
-        crate::bakkesmod::log(&format!($($arg)*));
-    })
-}
 
 pub fn register_notifier(name: &str, callback: Box<NotifierCallback>) {
     let callback = Box::new(callback);

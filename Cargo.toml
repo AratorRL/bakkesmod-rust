@@ -18,5 +18,6 @@ name = "bakkesmod"
 [workspace]
 members = [
     "crates/bakkesmod-macros",
-    "examples/rustplugin"
+    "examples/rustplugin",
+    "examples/tinyplugin",
 ]
