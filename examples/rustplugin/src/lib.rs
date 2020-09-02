@@ -4,10 +4,6 @@ use std::cell::RefCell;
 use bakkesmod;
 use bakkesmod::prelude::*;
 
-// use bakkesmod::{vec2, vec3};
-// use bakkesmod::{self, log_console, plugin_init};
-// use bakkesmod::wrappers::*;
-
 #[plugin_init]
 pub fn on_load() {
     bakkesmod::register_notifier("rust_notifier", Box::new(move |params: Vec<String>| {

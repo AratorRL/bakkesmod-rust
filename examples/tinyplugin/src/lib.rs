@@ -3,7 +3,7 @@ use bakkesmod::prelude::*;
 
 #[plugin_init]
 pub fn on_load() {
-    bakkesmod::register_notifier("get_ball_location", Box::new(move |_: Vec<String>| {
+    bakkesmod::register_notifier("set_ball_location", Box::new(move |_: Vec<String>| {
         let game = match bakkesmod::get_game_event_as_server() {
             Some(g) => g,
             None => {
@@ -14,7 +14,7 @@ pub fn on_load() {
         
         match game.get_ball() {
             Some(ball) => log_console!("{}", ball.get_location()),
-            None => log_console!("ball is NULL")
+            None => log_console!("ball is null")
         };
     }));
 }

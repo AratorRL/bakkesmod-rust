@@ -4,12 +4,7 @@ version = "0.1.0"
 authors = ["Arator"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-lazy_static = "1.4.0"
-log = "0.4"
-simplelog = "^0.7.4"
 bakkesmod-macros = { path = "crates/bakkesmod-macros"}
 
 [lib]

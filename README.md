@@ -3,6 +3,7 @@
 ## Example
 ```rust
 use bakkesmod;
+use bakkesmod::prelude::*;
 
 #[plugin_init]
 pub fn on_load() {
