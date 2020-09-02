@@ -3,9 +3,12 @@ name = "bakkesmod"
 version = "0.1.0"
 authors = ["Arator"]
 edition = "2018"
+description = "Rust SDK for writing BakkesMod plugins."
+license = "MIT"
+repository = "https://github.com/AratorRL/bakkesmod-rust"
 
 [dependencies]
-bakkesmod-macros = { path = "crates/bakkesmod-macros"}
+bakkesmod-macros = { path = "crates/bakkesmod-macros", version = "0.1.0" }
 
 [lib]
 name = "bakkesmod"
