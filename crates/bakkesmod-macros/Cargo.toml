@@ -3,6 +3,9 @@ name = "bakkesmod-macros"
 version = "0.1.0"
 authors = ["Arator"]
 edition = "2018"
+description = "Procedural macros for the bakkesmod crate"
+license = "MIT"
+repository = "https://github.com/AratorRL/bakkesmod-rust"
 
 [lib]
 proc-macro = true
