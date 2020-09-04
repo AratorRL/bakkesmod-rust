@@ -27,7 +27,7 @@ pub fn on_load() {
 # How to use
 
 ## Prerequisites
-Make sure you have installed [Rust](https://www.rust-lang.org/tools/install) and [BakkesMod](bakkesmod.com).
+Make sure you have installed [Rust](https://www.rust-lang.org/tools/install) and [BakkesMod](https://bakkesmod.com).
 
 Also, add an environment variable called `BAKKESMOD_LIB_PATH` containing the path to `pluginsdk.lib` (e.g. `C:\Program Files (x86)\Steam\steamapps\common\rocketleague\Binaries\Win64\bakkesmod\bakkesmodsdk\lib`).
 
