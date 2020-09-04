@@ -6,17 +6,14 @@ use bakkesmod::prelude::*;
 
 #[plugin_init]
 pub fn on_load() {
-    bakkesmod::register_notifier("rust_notifier", Box::new(move |params: Vec<String>| {
-        log_console!("this is the callback for rust_notifier!");
-        log_console!("params = {:x?}", params);
-    }));
-
     bakkesmod::register_notifier("rust_demolish", Box::new(move |_: Vec<String>| {
         match bakkesmod::get_local_car() {
             Some(car) => car.demolish(),
             None => log_console!("Car is NULL")
         };
     }));
+
+    bakkesmod::register_notifier("rust_notifier", Box::new(normal_function_callback));
 
     bakkesmod::register_notifier("rust_set_loc", Box::new(move |_: Vec<String>| {
         match bakkesmod::get_local_car() {
@@ -58,35 +55,38 @@ pub fn on_load() {
         log_console!("cvar {} has a new value: {}", cvar.get_name(), cvar.get_string_value());
     }));
 
+    bakkesmod::register_cvar("rust_ticker");
+
     let counter_base = Rc::new(RefCell::new(0));
     let counter_ref = Rc::clone(&counter_base);
 
-    let ticker = true;
+    bakkesmod::hook_event("Function Engine.GameViewportClient.Tick", Box::new(move || {
+        let ticker = bakkesmod::get_cvar("rust_ticker").unwrap();
+        if !ticker.get_bool_value() {
+            return;
+        }
 
-    if ticker {
-        bakkesmod::hook_event("Function Engine.GameViewportClient.Tick", Box::new(move || {
-            let mut counter = counter_ref.borrow_mut();
-            *counter += 1;
-            if (*counter % 240) == 0 {
-                // log_console!("viewport client tick");
+        let mut counter = counter_ref.borrow_mut();
+        *counter += 1;
+        if (*counter % 240) == 0 {
+            // log_console!("viewport client tick");
 
-                match bakkesmod::get_local_car() {
-                    Some(car) => {
-                        let location = car.get_location();
-                        log_console!("{}", location);
+            match bakkesmod::get_local_car() {
+                Some(car) => {
+                    let location = car.get_location();
+                    log_console!("{}", location);
 
-                        let vehicle_sim = car.get_vehicle_sim().unwrap();
-                        let wheels = vehicle_sim.get_wheels();
-                        let wheel0 = wheels.get(0);
-                        log_console!("wheel 0 spin speed: {}", wheel0.get_spin_speed());
-                        let wheel3 = wheels.get(3);
-                        log_console!("wheel 3 spin speed: {}", wheel3.get_spin_speed());
-                    }
-                    None => log_console!("Car is NULL")
-                };
-            }
-        }));
-    }
+                    let vehicle_sim = car.get_vehicle_sim().unwrap();
+                    let wheels = vehicle_sim.get_wheels();
+                    let wheel0 = wheels.get(0);
+                    log_console!("wheel 0 spin speed: {}", wheel0.get_spin_speed());
+                    let wheel3 = wheels.get(3);
+                    log_console!("wheel 3 spin speed: {}", wheel3.get_spin_speed());
+                }
+                None => log_console!("Car is NULL")
+            };
+        }
+    }));
 
     bakkesmod::register_drawable(Box::new(move |canvas: Canvas| {
         let top_left = vec2!(100, 100);
@@ -137,16 +137,22 @@ pub fn on_load() {
 
     }));
 
-    bakkesmod::register_notifier("rust_spawn_car", Box::new(move |_: Vec<String>| {
-        let game = match bakkesmod::get_game_event_as_server() {
-            Some(g) => g,
-            None => {
-                log_console!("game is null!");
-                return;
-            }
-        };
-        
-        game.spawn_bot(22, "Bors");
+    bakkesmod::register_notifier("rust_spawn_car", Box::new(spawn_car_callback));
+}
 
-    }));
+fn normal_function_callback(params: Vec<String>) {
+    log_console!("this is the callback for rust_notifier!");
+    log_console!("params = {:x?}", params);
+}
+
+fn spawn_car_callback(_: Vec<String>) {
+    let game = match bakkesmod::get_game_event_as_server() {
+        Some(g) => g,
+        None => {
+            log_console!("game is null!");
+            return;
+        }
+    };
+        
+    game.spawn_bot(22, "Bors");
 }

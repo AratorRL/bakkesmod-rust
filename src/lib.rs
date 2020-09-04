@@ -1,4 +1,4 @@
-#[macro_use] pub mod macros;
+#[macro_use] mod macros;
 
 mod bakkesmod;
 pub use bakkesmod::*;
