@@ -1,4 +1,5 @@
 # Rust SDK for BakkesMod plugins
+<a href="https://crates.io/crates/bakkesmod"><img src="https://img.shields.io/crates/v/bakkesmod.svg" alt="Crates.io version" /></a>
 
 ## Example
 ```rust
