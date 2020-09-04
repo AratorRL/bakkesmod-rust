@@ -23,3 +23,31 @@ pub fn on_load() {
     }));
 }
 ```
+
+# How to use
+
+## Prerequisites
+Make sure you have installed [Rust](https://www.rust-lang.org/tools/install) and [BakkesMod](bakkesmod.com).
+
+Also, add an environment variable called `BAKKESMOD_LIB_PATH` containing the path to `pluginsdk.lib` (e.g. `C:\Program Files (x86)\Steam\steamapps\common\rocketleague\Binaries\Win64\bakkesmod\bakkesmodsdk\lib`).
+
+
+## Write the plugin
+Create a new Rust library project with `cargo new --lib <pluginname>`.
+
+Add the following to the generated `Cargo.toml`:
+```toml
+[dependencies]
+bakkesmod = "0.1.0"
+
+[lib]
+name = "pluginname"
+crate_type = ["cdylib"]
+```
+
+Write your plugin code in `src/lib.rs` (and possibly add more files).
+Make sure you have exactly one function with the `#[plugin_init]` attribute. This function will be called when the plugin is loaded.
+
+## Building
+Use `cargo build` or `cargo build --release` to build. A `<pluginname>.dll` file is created in `target/debug` or `target/release`.
+Copy this file to your `bakkesmod/plugins` folder. It can now be loaded in-game with `plugin load <pluginname>`.

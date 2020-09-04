@@ -6,7 +6,6 @@ edition = "2018"
 
 [dependencies]
 bakkesmod = { path = "../../" }
-bakkesmod-macros = { path = "../../crates/bakkesmod-macros" }
 
 [lib]
 name = "tinyplugin"
