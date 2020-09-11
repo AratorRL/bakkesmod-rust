@@ -9,6 +9,19 @@ impl RBActor for BallWrapper {}
 impl Actor for BallWrapper {}
 
 pub trait Ball : RBActor {
+    fn get_last_touch_time(&self) -> f32 {
+        unsafe { Ball_GetLastTouchTime(self.addr()) }
+    }
+
+    fn predict_position(&self, time_ahead: f32) -> PredictionInfo {
+        let mut result = PredictionInfo::new();
+        let result_ptr = &result as *const PredictionInfo;
+        unsafe { Ball_PredictPosition(self.addr(), time_ahead, result_ptr); }
+        result
+    }
+
+
+
     fn get_end_of_game_fx_archetype(&self) -> Option<FXActorWrapper> {
         unsafe {
             FXActorWrapper::try_new(Ball_TA_Get_EndOfGameFXArchetype(self.addr()))
@@ -308,6 +321,11 @@ pub trait Ball : RBActor {
 }
 
 extern "C" {
+
+    fn Ball_GetLastTouchTime(obj: usize) -> f32;
+    fn Ball_PredictPosition(obj: usize, time_ahead: f32, result: *const PredictionInfo);
+
+
     fn Ball_TA_Get_EndOfGameFXArchetype(obj: usize) -> usize;
     fn BallWrapper_SetEndOfGameFXArchetype(obj: usize, new_val: usize);
     fn Ball_TA_Get_bAllowPlayerExplosionOverride(obj: usize) -> bool;

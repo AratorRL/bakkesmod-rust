@@ -15,6 +15,9 @@ use crate::log_console;
 mod generated;
 pub use generated::*;
 
+mod mmr;
+pub use mmr::*;
+
 pub trait UnrealPointer {
     fn from_ptr(addr: usize) -> Self;
 }
@@ -288,6 +291,34 @@ impl VehicleInputs {
     }
 }
 
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct SkillRating {
+    mu: f32,
+    sigma: f32
+}
+impl_unreal_pointer_struct!(SkillRating);
+
+impl SkillRating {
+    pub fn new() -> Self {
+        SkillRating { mu: 0.0, sigma: 0.0 }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct SkillRank {
+    tier: i32,
+    division: i32,
+    matches_player: i32
+}
+impl_unreal_pointer_struct!(SkillRank);
+
+impl SkillRank {
+    pub fn new() -> Self {
+        SkillRank { tier: 0, division: 0, matches_player: 0 }
+    }
+}
 
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -303,9 +334,21 @@ struct_default_new!(WheelContactData);
 
 #[repr(C)]
 #[derive(Copy, Clone)]
+pub struct POV(usize);
+impl_unreal_pointer_struct!(POV);
+struct_default_new!(POV);
+
+#[repr(C)]
+#[derive(Copy, Clone)]
 pub struct LinearColor(usize);
 impl_unreal_pointer_struct!(LinearColor);
 struct_default_new!(LinearColor);
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct PredictionInfo(usize);
+impl_unreal_pointer_struct!(PredictionInfo);
+struct_default_new!(PredictionInfo);
 
 #[repr(C)]
 #[derive(Copy, Clone)]

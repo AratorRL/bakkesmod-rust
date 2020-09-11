@@ -10,6 +10,133 @@ impl BaseCamera for CameraWrapper {}
 impl Actor for CameraWrapper {}
 
 pub trait Camera : CameraX {
+	fn get_location(&self) -> Vector {
+        let mut result = Vector::new();
+        let result_ptr = &mut result as *mut Vector;
+        unsafe { Camera_GetLocation(self.addr(), result_ptr); }
+        result
+    }
+
+	fn set_location(&self, location: Vector) {
+        let location = &location as *const Vector;
+        unsafe { Camera_SetLocation(self.addr(), location); }
+    }
+
+	fn get_rotation(&self) -> Rotator {
+        let mut result = Rotator::new();
+        let result_ptr = &mut result as *mut Rotator;
+        unsafe { Camera_GetRotation(self.addr(), result_ptr); }
+        result
+    }
+
+	fn set_rotation(&self, rotation: Rotator) {
+        let rotation = &rotation as *const Rotator;
+        unsafe { Camera_SetRotation(self.addr(), rotation); }
+    }
+
+	fn get_camera_settings(&self) -> ProfileCameraSettings {
+        let mut result = ProfileCameraSettings::new();
+        let result_ptr = &result as *const ProfileCameraSettings;
+        unsafe { Camera_GetCameraSettings(self.addr(), result_ptr); }
+        result
+    }
+
+	fn set_camera_settings(&self, settings: ProfileCameraSettings) {
+        let settings = &settings as *const ProfileCameraSettings;
+        unsafe { Camera_SetCameraSettings(self.addr(), settings); }
+    }
+
+	fn is_camera_shake_on(&self) -> bool {
+        unsafe { Camera_IsCameraShakeOn(self.addr()) }
+    }
+
+	fn get_pov(&self) -> POV {
+        let mut result = POV::new();
+        let result_ptr = &result as *const POV;
+        unsafe { Camera_GetPOV(self.addr(), result_ptr); }
+        result
+    }
+
+	fn set_pov(&self, pov: POV) {
+        let pov = &pov as *const POV;
+        unsafe { Camera_SetPOV(self.addr(), pov); }
+    }
+
+	fn set_fov(&self, fov: f32) {
+        unsafe { Camera_SetFOV_custom(self.addr(), fov); }
+    }
+
+	fn get_fov(&self) -> f32 {
+        unsafe { Camera_GetFOV(self.addr()) }
+    }
+
+	fn set_locked_fov(&self, lock: bool) {
+        unsafe { Camera_SetLockedFOV(self.addr(), lock); }
+    }
+
+	fn get_camera_as_actor(&self) -> Option<ActorWrapper> {
+        unsafe { ActorWrapper::try_new(Camera_GetCameraAsActor(self.addr())) }
+    }
+
+	fn get_camera_state(&self) -> String {
+        let result: *const c_char = 0 as *const c_char;
+        let result_ptr: *const *const c_char = &result as *const *const c_char;
+
+        unsafe { 
+            Camera_GetCameraState(self.addr(), result_ptr);
+            let result = *result_ptr;
+            let c_result = CStr::from_ptr(result);
+            match c_result.to_str() {
+                Ok(s) => String::from(s),
+                Err(_) => String::new()
+            }
+        }
+    }
+
+	fn set_camera_state(&self, state_name: &str) {
+        let c_string = CString::new(state_name).unwrap();
+        let c_string: *const c_char = c_string.as_ptr();
+
+        unsafe { Camera_SetCameraState(self.addr(), c_string); }
+    }
+
+	fn linterp(&self, start: Vector, end: Vector, elapsed: f32, speed: f32) -> Vector {
+        let start = &start as *const Vector;
+        let end = &end as *const Vector;
+        let mut result = Vector::new();
+        let result_ptr = &result as *const Vector;
+        unsafe { Camera_linterp(self.addr(), start, end, elapsed, speed, result_ptr); }
+        result
+    }
+
+	fn get_focus_actor(&self) -> String {
+        let result: *const c_char = 0 as *const c_char;
+        let result_ptr: *const *const c_char = &result as *const *const c_char;
+
+        unsafe { 
+            Camera_GetFocusActor(self.addr(), result_ptr);
+            let result = *result_ptr;
+            let c_result = CStr::from_ptr(result);
+            match c_result.to_str() {
+                Ok(s) => String::from(s),
+                Err(_) => String::new()
+            }
+        }
+    }
+
+	fn set_focus_actor(&self, actor_name: &str) -> bool {
+        let c_string = CString::new(actor_name).unwrap();
+        let c_string: *const c_char = c_string.as_ptr();
+
+        unsafe { Camera_SetFocusActor(self.addr(), c_string) }
+    }
+
+	fn set_fly_cam_ball_target_mode(&self) -> bool {
+        unsafe { Camera_SetFlyCamBallTargetMode(self.addr()) }
+    }
+
+
+
     fn get_swivel_fast_speed(&self) -> f32 {
         unsafe {
             Camera_TA_Get_SwivelFastSpeed(self.addr())
@@ -113,6 +240,26 @@ pub trait Camera : CameraX {
 }
 
 extern "C" {
+	fn Camera_GetLocation(obj: usize, result: *const Vector);
+	fn Camera_SetLocation(obj: usize, location: *const Vector);
+	fn Camera_GetRotation(obj: usize, result: *const Rotator);
+	fn Camera_SetRotation(obj: usize, rotation: *const Rotator);
+	fn Camera_GetCameraSettings(obj: usize, result: *const ProfileCameraSettings);
+	fn Camera_SetCameraSettings(obj: usize, settings: *const ProfileCameraSettings);
+	fn Camera_IsCameraShakeOn(obj: usize) -> bool;
+	fn Camera_GetPOV(obj: usize, result: *const POV);
+	fn Camera_SetPOV(obj: usize, pov: *const POV);
+	fn Camera_SetFOV_custom(obj: usize, fov: f32);
+	fn Camera_GetFOV(obj: usize) -> f32;
+	fn Camera_SetLockedFOV(obj: usize, lock: bool);
+	fn Camera_GetCameraAsActor(obj: usize) -> usize;
+	fn Camera_GetCameraState(obj: usize, result: *const *const c_char);
+	fn Camera_SetCameraState(obj: usize, state_name: *const c_char);
+	fn Camera_linterp(obj: usize, start: *const Vector, end: *const Vector, elapsed: f32, speed: f32, result: *const Vector);
+	fn Camera_GetFocusActor(obj: usize, result: *const *const c_char);
+	fn Camera_SetFocusActor(obj: usize, actorName: *const c_char) -> bool;
+	fn Camera_SetFlyCamBallTargetMode(obj: usize) -> bool;
+
     fn Camera_TA_Get_SwivelFastSpeed(obj: usize) -> f32;
     fn CameraWrapper_SetSwivelFastSpeed(obj: usize, new_val: f32);
     fn Camera_TA_Get_SwivelDieRate(obj: usize) -> f32;

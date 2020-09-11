@@ -11,6 +11,36 @@ impl GameEvent for TutorialWrapper {}
 impl Actor for TutorialWrapper {}
 
 pub trait Tutorial : Server {
+    fn redo(&self) {
+        unsafe { Tutorial_Redo(self.addr()); }
+    }
+
+    fn get_car_spawn_location(&self) -> Vector {
+        let mut result = Vector::new();
+        let result_ptr = &result as *const Vector;
+        unsafe { Tutorial_GetCarSpawnLocation(self.addr(), result_ptr); }
+        result
+    }
+
+    fn set_car_spawn_location(&self, v: Vector) {
+        let v = &v as *const Vector;
+        unsafe { Tutorial_SetCarSpawnLocation(self.addr(), v); }
+    }
+
+    fn get_car_spawn_rotation(&self) -> Rotator {
+        let mut result = Rotator::new();
+        let result_ptr = &result as *const Rotator;
+        unsafe { Tutorial_GetCarSpawnRotation(self.addr(), result_ptr); }
+        result
+    }
+
+    fn set_car_spawn_rotation(&self, r: Rotator) {
+        let r = &r as *const Rotator;
+        unsafe { Tutorial_SetCarSpawnRotation(self.addr(), r); }
+    }
+
+
+
     fn get_total_field_extent(&self) -> Vector {
         unsafe {
             let mut result = Vector::new();
@@ -570,6 +600,13 @@ pub trait Tutorial : Server {
 }
 
 extern "C" {
+    fn Tutorial_Redo(obj: usize);
+    fn Tutorial_GetCarSpawnLocation(obj: usize, result: *const Vector);
+    fn Tutorial_SetCarSpawnLocation(obj: usize, v: *const Vector);
+    fn Tutorial_GetCarSpawnRotation(obj: usize, result: *const Rotator);
+    fn Tutorial_SetCarSpawnRotation(obj: usize, v: *const Rotator);
+
+
     fn GameEvent_Tutorial_TA_Get_TotalFieldExtent(obj: usize, result: *mut Vector);
     fn TutorialWrapper_SetTotalFieldExtent(obj: usize, new_val: *mut Vector);
     fn GameEvent_Tutorial_TA_Get_TeamNum(obj: usize) -> i32;

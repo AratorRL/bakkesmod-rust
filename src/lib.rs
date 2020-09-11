@@ -1,4 +1,5 @@
 #[macro_use] mod macros;
+#[macro_use] mod errors;
 
 mod bakkesmod;
 pub use bakkesmod::*;
@@ -7,6 +8,7 @@ pub use bakkesmod::*;
 
 pub mod prelude {
     pub use {log_console, vec2, vec3};
+    pub use bakkesmod_error;
     pub use crate::wrappers::*;
     pub use bakkesmod_macros::plugin_init;
 }
