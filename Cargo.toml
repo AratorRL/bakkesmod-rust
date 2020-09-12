@@ -18,4 +18,5 @@ members = [
     "crates/bakkesmod-macros",
     "examples/rustplugin",
     "examples/tinyplugin",
+    "examples/canvastest"
 ]

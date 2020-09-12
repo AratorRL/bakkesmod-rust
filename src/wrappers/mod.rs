@@ -254,6 +254,12 @@ impl Color {
     }
 }
 
+#[macro_export]
+macro_rules! color {
+    ($r:expr, $g:expr, $b:expr, $a:expr) => (
+        $crate::wrappers::Color::from($r as u8, $g as u8, $b as u8, $a as u8)
+    );
+}
 
 
 #[repr(C)]
@@ -369,9 +375,30 @@ struct_default_new!(POV);
 
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub struct LinearColor(usize);
+pub struct LinearColor {
+    r: f32,
+    g: f32,
+    b: f32,
+    a: f32
+}
 impl_unreal_pointer_struct!(LinearColor);
-struct_default_new!(LinearColor);
+
+impl LinearColor {
+    pub fn new() -> Self {
+        LinearColor { r: 0.0, g: 0.0, b: 0.0, a: 0.0 }
+    }
+
+    pub fn from(r: f32, g: f32, b: f32, a: f32) -> Self {
+        LinearColor { r, g, b, a }
+    }
+}
+
+#[macro_export]
+macro_rules! lin_color {
+    ($r:expr, $g:expr, $b:expr, $a:expr) => (
+        $crate::wrappers::LinearColor::from($r as f32, $g as f32, $b as f32, $a as f32)
+    );
+}
 
 #[repr(C)]
 #[derive(Copy, Clone)]

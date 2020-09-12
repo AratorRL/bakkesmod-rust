@@ -1,0 +1,12 @@
+[package]
+name = "canvastest"
+version = "0.1.0"
+authors = ["Arator <arator.rl@outlook.com>"]
+edition = "2018"
+
+[dependencies]
+bakkesmod = { path = "../../" }
+
+[lib]
+name = "canvastest"
+crate_type = ["cdylib"]
