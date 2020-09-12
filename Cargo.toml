@@ -1,6 +1,6 @@
 [package]
 name = "bakkesmod"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Arator"]
 edition = "2018"
 description = "Rust SDK for writing BakkesMod plugins."
@@ -20,3 +20,6 @@ members = [
     "examples/tinyplugin",
     "examples/canvastest"
 ]
+
+[package.metadata.docs.rs]
+rustc-args = ["--cfg", "docsrs"]
