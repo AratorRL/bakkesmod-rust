@@ -1,22 +1,26 @@
 use std::rc::Rc;
 use std::cell::RefCell;
 
-use bakkesmod;
 use bakkesmod::prelude::*;
+use bakkesmod::game;
+use bakkesmod::console;
+use bakkesmod::wrappers::cvar::CVar;
+use bakkesmod::wrappers::canvas::Canvas;
+use bakkesmod::wrappers::unreal::*;
 
 #[plugin_init]
 pub fn on_load() {
-    bakkesmod::register_notifier("rust_demolish", Box::new(move |_: Vec<String>| {
-        match bakkesmod::get_local_car() {
+    console::register_notifier("rust_demolish", Box::new(move |_: Vec<String>| {
+        match game::get_local_car() {
             Some(car) => car.demolish(),
             None => log_console!("Car is NULL")
         };
     }));
 
-    bakkesmod::register_notifier("rust_notifier", Box::new(normal_function_callback));
+    console::register_notifier("rust_notifier", Box::new(normal_function_callback));
 
-    bakkesmod::register_notifier("rust_set_loc", Box::new(move |_: Vec<String>| {
-        match bakkesmod::get_local_car() {
+    console::register_notifier("rust_set_loc", Box::new(move |_: Vec<String>| {
+        match game::get_local_car() {
             Some(car) => {
                 let origin = vec3!(0.0, 0.0, 0.0);
                 let new_loc = origin + vec3!(200.0, 1000.0, 50.0);
@@ -26,10 +30,10 @@ pub fn on_load() {
         };
     }));
 
-    let cvar = bakkesmod::register_cvar("rust_cvar");
+    let cvar = console::register_cvar("rust_cvar");
     log_console!("cvar name = {}", cvar.get_name());
 
-    bakkesmod::register_notifier("rust_set_gravity", Box::new(move |params: Vec<String>| {
+    console::register_notifier("rust_set_gravity", Box::new(move |params: Vec<String>| {
         if params.len() < 2 {
             log_console!("not enough parameters!");
             return;
@@ -41,7 +45,7 @@ pub fn on_load() {
             Err(_) => { log_console!("invalid input!"); return; }
         };
 
-        match bakkesmod::get_cvar("sv_soccar_gravity") {
+        match console::get_cvar("sv_soccar_gravity") {
             Some(cvar) => {
                 log_console!("current value: {}", cvar.get_float_value());
                 log_console!("setting to {}", new_value);
@@ -51,17 +55,17 @@ pub fn on_load() {
         };
     }));
 
-    bakkesmod::add_on_value_changed(&cvar, Box::new(move |_: String, cvar: CVar| {
+    console::add_on_value_changed(&cvar, Box::new(move |_: String, cvar: CVar| {
         log_console!("cvar {} has a new value: {}", cvar.get_name(), cvar.get_string_value());
     }));
 
-    bakkesmod::register_cvar("rust_ticker");
+    console::register_cvar("rust_ticker");
 
     let counter_base = Rc::new(RefCell::new(0));
     let counter_ref = Rc::clone(&counter_base);
 
-    bakkesmod::hook_event("Function Engine.GameViewportClient.Tick", Box::new(move || {
-        let ticker = bakkesmod::get_cvar("rust_ticker").unwrap();
+    game::hook_event("Function Engine.GameViewportClient.Tick", Box::new(move || {
+        let ticker = console::get_cvar("rust_ticker").unwrap();
         if !ticker.get_bool_value() {
             return;
         }
@@ -71,7 +75,7 @@ pub fn on_load() {
         if (*counter % 240) == 0 {
             // log_console!("viewport client tick");
 
-            match bakkesmod::get_local_car() {
+            match game::get_local_car() {
                 Some(car) => {
                     let location = car.get_location();
                     log_console!("{}", location);
@@ -88,7 +92,7 @@ pub fn on_load() {
         }
     }));
 
-    bakkesmod::register_drawable(Box::new(move |canvas: Canvas| {
+    game::register_drawable(Box::new(move |canvas: Canvas| {
         let top_left = vec2!(100, 100);
         let width = vec2!(250, 0);
         let height = vec2!(0, 150);
@@ -98,7 +102,7 @@ pub fn on_load() {
         canvas.draw_line(top_left + height, top_left + width + height);
     }));
 
-    bakkesmod::hook_event_with_caller_post(
+    game::hook_event_with_caller_post(
         "Function TAGame.Car_TA.ApplyBallImpactForces",
         Box::new(move |car: Box<CarWrapper>| {
             log_console!("Ball hit!");
@@ -106,7 +110,7 @@ pub fn on_load() {
         })
     );
 
-    bakkesmod::register_notifier("rust_set_timer", Box::new(move |params: Vec<String>| {
+    console::register_notifier("rust_set_timer", Box::new(move |params: Vec<String>| {
         if params.len() < 2 {
             log_console!("not enough parameters!");
         } else {
@@ -115,14 +119,14 @@ pub fn on_load() {
                 Ok(secs) => secs,
                 Err(_) => { log_console!("invalid input!"); return; }
             };
-            bakkesmod::set_timeout(Box::new(move || {
+            game::set_timeout(Box::new(move || {
                 log_console!("{} secs have passed!", time);
             }), time);
         }
     }));
 
-    bakkesmod::register_notifier("rust_get_ball_info", Box::new(move |_: Vec<String>| {
-        let game = match bakkesmod::get_game_event_as_server() {
+    console::register_notifier("rust_get_ball_info", Box::new(move |_: Vec<String>| {
+        let game = match game::get_game_event_as_server() {
             Some(g) => g,
             None => {
                 log_console!("game is null!");
@@ -137,7 +141,7 @@ pub fn on_load() {
 
     }));
 
-    bakkesmod::register_notifier("rust_spawn_car", Box::new(spawn_car_callback));
+    console::register_notifier("rust_spawn_car", Box::new(spawn_car_callback));
 }
 
 fn normal_function_callback(params: Vec<String>) {
@@ -146,7 +150,7 @@ fn normal_function_callback(params: Vec<String>) {
 }
 
 fn spawn_car_callback(_: Vec<String>) {
-    let game = match bakkesmod::get_game_event_as_server() {
+    let game = match game::get_game_event_as_server() {
         Some(g) => g,
         None => {
             log_console!("game is null!");

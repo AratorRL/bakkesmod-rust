@@ -1,6 +1,6 @@
 [package]
 name = "bakkesmod"
-version = "0.1.2"
+version = "0.2.0"
 authors = ["Arator"]
 edition = "2018"
 description = "Rust SDK for writing BakkesMod plugins."

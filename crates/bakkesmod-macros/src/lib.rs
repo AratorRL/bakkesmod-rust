@@ -13,13 +13,13 @@ pub fn plugin_init(_attr: TokenStream, input: TokenStream) -> TokenStream {
 
         #[no_mangle]
         pub extern "C" fn InitPlugin(id: u64) {
-            bakkesmod::bakkesmod_init(id);
+            bakkesmod_init(id);
             #name();
         }
 
         #[no_mangle]
         pub extern "C" fn ExitPlugin() {
-            bakkesmod::bakkesmod_exit();
+            bakkesmod_exit();
         }
     };
 

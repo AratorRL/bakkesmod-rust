@@ -1,10 +1,12 @@
-use bakkesmod;
 use bakkesmod::prelude::*;
+use bakkesmod::game;
+use bakkesmod::console;
+use bakkesmod::wrappers::unreal::*;
 
 #[plugin_init]
 pub fn on_load() {
-    bakkesmod::register_notifier("set_ball_location", Box::new(move |_: Vec<String>| {
-        let game = match bakkesmod::get_game_event_as_server() {
+    console::register_notifier("set_ball_location", Box::new(move |_: Vec<String>| {
+        let game = match game::get_game_event_as_server() {
             Some(g) => g,
             None => {
                 log_console!("game is null!");

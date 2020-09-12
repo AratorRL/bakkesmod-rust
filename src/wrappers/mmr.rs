@@ -1,4 +1,8 @@
-use crate::wrappers::*;
+use crate::wrappers::structs::{
+    UniqueNetId,
+    SkillRating,
+    SkillRank
+};
 
 pub fn is_syncing(player_id: UniqueNetId) -> bool {
     unsafe { IsSyncing(player_id) }

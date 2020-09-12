@@ -1,11 +1,12 @@
-use bakkesmod;
 use bakkesmod::prelude::*;
+use bakkesmod::game;
+use bakkesmod::wrappers::canvas::Canvas;
 
 #[plugin_init]
 fn on_load() {
     log_console!("This is the canvastest plugin.");
 
-    bakkesmod::register_drawable(Box::new(move |canvas: Canvas| {
+    game::register_drawable(Box::new(move |canvas: Canvas| {
         let red = lin_color!(255.0, 0, 0, 255.0);
         canvas.set_color(red);
         canvas.set_position(vec2!(100, 100));
