@@ -10,9 +10,70 @@ impl RBActor for CarWrapper {}
 impl Actor for CarWrapper {}
 
 pub trait Car : Vehicle {
+    fn is_boost_cheap(&self) -> bool {
+        unsafe { Car_IsBoostCheap(self.addr()) }
+    }
+
+    fn set_boost_cheap(&self, b: bool) {
+        unsafe { Car_SetBoostCheap(self.addr(), b); }
+    }
+
+    fn set_car_rotation(&self, rotation: Rotator) {
+        let rotation = &rotation as *const Rotator;
+        unsafe { Car_SetCarRotation(self.addr(), rotation); }
+    }
+
+    fn force_boost(&self, force: bool) {
+        unsafe { Car_ForceBoost(self.addr(), force); }
+    }
+
+    fn get_owner_name(&self) -> String {
+        let result: *const c_char = 0 as *const c_char;
+        let result_ptr: *const *const c_char = &result as *const *const c_char;
+
+        unsafe {
+            Car_GetOwnerName(self.addr(), result_ptr);
+            let result = *result_ptr;
+            let c_result = CStr::from_ptr(result);
+            match c_result.to_str() {
+                Ok(s) => String::from(s),
+                Err(_) => String::new()
+            }
+        }
+    }
+
+    fn unfreeze(&self) {
+        unsafe { Car_Unfreeze(self.addr()); }
+    }
+
+    fn get_input(&self) -> VehicleInputs {
+        let mut result = VehicleInputs::new();
+        let result_ptr = &result as *const VehicleInputs;
+        unsafe { Car_GetInput(self.addr(), result_ptr); }
+        result
+    }
+
+    fn set_input(&self, input: VehicleInputs) {
+        let input = &input as *const VehicleInputs;
+        unsafe { Car_SetInput(self.addr(), input); }
+    }
+
+    fn destroy(&self) {
+        unsafe { Car_Destroy(self.addr()); }
+    }
+
     fn demolish(&self) {
         unsafe { Car_Demolish(self.addr()); }
     }
+
+    fn has_flip(&self) -> u64 {
+        unsafe { Car_HasFlip(self.addr()) }
+    }
+
+    fn get_loadout_body(&self) -> i32 {
+        unsafe { Car_GetLoadoutBody(self.addr()) }
+    }
+
 
     fn get_default_car_components(&self) -> RLArray<CarComponentWrapper> {
         unsafe {
@@ -363,7 +424,18 @@ pub trait Car : Vehicle {
 }
 
 extern "C" {
-    fn Car_Demolish(p_car: usize);
+    fn Car_IsBoostCheap(obj: usize) -> bool;
+    fn Car_SetBoostCheap(obj: usize, b: bool);
+    fn Car_SetCarRotation(obj: usize, rotation: *const Rotator);
+    fn Car_ForceBoost(obj: usize, force: bool);
+    fn Car_GetOwnerName(obj: usize, result: *const *const c_char);
+    fn Car_Unfreeze(obj: usize);
+    fn Car_GetInput(obj: usize, result: *const VehicleInputs);
+    fn Car_SetInput(obj: usize, input: *const VehicleInputs);
+    fn Car_Destroy(obj: usize);
+    fn Car_Demolish(obj: usize);
+    fn Car_HasFlip(obj: usize) -> u64;
+    fn Car_GetLoadoutBody(obj: usize) -> i32;
 
     fn Car_TA_Get_DefaultCarComponents(obj: usize, result: *mut RLArrayRaw);
     fn Car_TA_Get_FlipComponent(obj: usize) -> usize;
